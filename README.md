@@ -6,6 +6,7 @@ Hello, Welcome to The Witness Randomizer Variety Mode. It features some puzzles 
 If you haven't tried Sigma's Random Puzzle Generator, you can get one from here too: https://github.com/Penguin12335/witness-randomizer
 
 Variety: Normal Mode features Normal and Expert Puzzles from Sigma's and New puzzle types I made. (Speedrun Welcome)
+
 Inferno: Cruel Mode features Big Grids with a Load of Symbols. For those who seek Witness Madness.  (Speedrun Optional)
 
 **Are you up to the Challenge?**
