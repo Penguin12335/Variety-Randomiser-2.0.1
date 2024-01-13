@@ -462,25 +462,25 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
 	CreateWindow(L"STATIC", L"Choose Difficuty:",
 		WS_TABSTOP | WS_VISIBLE | WS_CHILD | SS_LEFT,
-		10, 15, 120, 16, hwnd, NULL, hInstance, NULL);
-	hwndNormal = CreateWindow(L"BUTTON", L"NORMAL - Puzzles that should be reasonably challenging for most players. Puzzle mechanics are mostly identical to those in the original game.",
+		10, 15, 110, 20, hwnd, NULL, hInstance, NULL);
+	hwndNormal = CreateWindow(L"BUTTON", L"VARIETY  - Features variety of Puzzles, including new mechanics From Sigma's Normal and Expert Randomizer, All Puzzle mechanics are identical to base game.",
 		WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | BS_MULTILINE,
 		10, 35, 570, 35, hwnd, (HMENU)IDC_DIFFICULTY_NORMAL, hInstance, NULL);
-	hwndExpert = CreateWindow(L"BUTTON", L"EXPERT - Very difficult puzzles with complex mechanics and mind-boggling new tricks. For brave players seeking the ultimate challenge.",
+	hwndExpert = CreateWindow(L"BUTTON", L"INFERNO - aka Variety Cruel; All of the puzzles are more difficult and trickier. PLAY AT YOUR OWN RISK",
 		WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | BS_MULTILINE,
-		10, 75, 570, 35, hwnd, (HMENU)IDC_DIFFICULTY_EXPERT, hInstance, NULL);
+		10, 75, 570, 50, hwnd, (HMENU)IDC_DIFFICULTY_EXPERT, hInstance, NULL);
 	if (hard) SendMessage(hwndExpert, BM_SETCHECK, BST_CHECKED, 1);
 	else SendMessage(hwndNormal, BM_SETCHECK, BST_CHECKED, 1);
 
 	CreateWindow(L"STATIC", L"Options:",
 		WS_TABSTOP | WS_VISIBLE | WS_CHILD | SS_LEFT,
-		10, 125, 120, 16, hwnd, NULL, hInstance, NULL);
-	hwndColorblind = CreateWindow(L"BUTTON", L"Colorblind Mode - The colors on certain panels will be changed to be more accommodating to people with colorblindness. The puzzles themselves are identical to those generated without colorblind mode enabled.",
+		10, 130, 120, 16, hwnd, NULL, hInstance, NULL);
+	hwndColorblind = CreateWindow(L"BUTTON", L"Colorblind Mode - The colors on certain panels will be changed to be more accommodating to people with c4^olorblindness. The puzzles themselves are identical to those generated without colorblind mode enabled.",
 		WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX | BS_MULTILINE,
-		10, 145, 570, 50, hwnd, (HMENU)IDC_COLORBLIND, hInstance, NULL);
+		10, 150, 570, 50, hwnd, (HMENU)IDC_COLORBLIND, hInstance, NULL);
 	hwndDoubleMode = CreateWindow(L"BUTTON", L"Double Mode - In addition to generating new puzzles, the randomizer will also shuffle the location of most puzzles.",
 		WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX | BS_MULTILINE,
-		10, 200, 570, 35, hwnd, (HMENU)IDC_DOUBLE, hInstance, NULL);
+		10, 205, 570, 35, hwnd, (HMENU)IDC_DOUBLE, hInstance, NULL);
 	if (doubleMode) SendMessage(hwndDoubleMode, BM_SETCHECK, BST_CHECKED, 1);
 
 	CreateWindow(L"STATIC", L"Enter a seed (optional):",
