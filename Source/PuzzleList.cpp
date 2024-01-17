@@ -262,8 +262,10 @@ void PuzzleList::GenerateQuarryN()
 		Decoration::Star | Decoration::Color::White, 3, Decoration::Star | Decoration::Color::Black, 1, Decoration::Star | Decoration::Color::Magenta, 2,
 		Decoration::Dot, 5);
 	generator->setGridSize(7, 7);
-	generator->generate(0x3C125, Decoration::Eraser | Decoration::Color::White, 1, Decoration::Triangle | Decoration::Color::White, 13, Decoration::Dot_Intersection, 64, Decoration::Start, 3, Decoration::Exit, 3);
+	generator->setSymmetry(Panel::Symmetry::Rotational);
+	generator->generate(0x3C125, Decoration::Eraser | Decoration::Color::White, 1, Decoration::Stone | Decoration::Color::White, 9, Decoration::Stone | Decoration::Color::Black, 9, Decoration::Dot, 5, Decoration::Start, 1, Decoration::Exit, 2);
 	//Boathouse Ramp Activation
+	generator->resetConfig();
 	generator->setGridSize(5, 5);
 	generator->setFlag(Generate::Config::EnableFlash);
 	generator->generate(0x034D4, Decoration::Star | Decoration::White, 8, Decoration::Star | Decoration::Black, 6, Decoration::Star | Decoration::Magenta, 4);
@@ -604,7 +606,7 @@ void PuzzleList::GenerateVaultsN()
 	//Tutorial Vault
 	generator->setSymmetry(Panel::Symmetry::Rotational);
 	generator->setGridSize(7, 7);
-	generator->generate(0x033D4, Decoration::Stone | Decoration::Color::White, 12, Decoration::Stone | Decoration::Color::Black, 12, Decoration::Dot, 7, Decoration::Start, 1, Decoration::Exit, 2);
+	generator->generate(0x033D4, Decoration::Stone | Decoration::Color::White, 9, Decoration::Stone | Decoration::Color::Black, 9, Decoration::Dot, 5, Decoration::Start, 1, Decoration::Exit, 2);
 	//Tetris Vault
 	generator->resetConfig();
 	generator->setFlagOnce(Generate::Config::RequireCancelShapes);
