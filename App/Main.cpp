@@ -466,7 +466,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	hwndNormal = CreateWindow(L"BUTTON", L"VARIETY  - Features variety of Puzzles, including new mechanics From Sigma's Normal and Expert Randomizer, All Puzzle mechanics are identical to base game.",
 		WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | BS_MULTILINE,
 		10, 35, 570, 35, hwnd, (HMENU)IDC_DIFFICULTY_NORMAL, hInstance, NULL);
-	hwndExpert = CreateWindow(L"BUTTON", L"INFERNO - aka Variety Cruel; All of the puzzles are more difficult and trickier. PLAY AT YOUR OWN RISK",
+	hwndExpert = CreateWindow(L"BUTTON", L"INFERNO -  All of the puzzles are more difficult and trickier. PLAY AT YOUR OWN RISK ",
 		WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | BS_MULTILINE,
 		10, 75, 570, 50, hwnd, (HMENU)IDC_DIFFICULTY_EXPERT, hInstance, NULL);
 	if (hard) SendMessage(hwndExpert, BM_SETCHECK, BST_CHECKED, 1);
