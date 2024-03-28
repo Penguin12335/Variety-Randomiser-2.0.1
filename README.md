@@ -1,13 +1,13 @@
 **The Witness Variety Randomizer**
 Download it from here: https://github.com/Penguin12335/witness-randomizer/releases/tag/1.0
 
-Hello, Welcome to The Witness Randomizer Variety Mode. It features some puzzles from Sigma's Radndomizers, including new mechanics. It also features various puzzles types I made, waiting for you to find out.
+Hello, Welcome to The Witness Randomizer Variety Mode. It features some puzzles from Sigma's Radndomizers, including new mechanics. It also features various puzzle types I made, waiting for you to find out.
 
 If you haven't tried Sigma's Random Puzzle Generator, you can get one from here too: https://github.com/sigma144/witness-randomizer
 
 Variety: Normal Mode features Normal and Expert Puzzles from Sigma's and New puzzle types I made. (Speedrun Welcome)
 
-Inferno: Cruel Mode features Big Grids with a Load of Symbols. For those who seek Witness Madness.  (Speedrun Optional)
+Ascension: Implement New Symbols from Looksy and Chuukun's Randomizer, giving players more Unique Witness Adventure.  (Speedrun Optional)
 
 **Are you up to the Challenge?**
 
