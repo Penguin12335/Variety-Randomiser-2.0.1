@@ -666,7 +666,7 @@ void PuzzleList::GenerateMountainN()
 	//Orange Row
 	generator->resetConfig();
 	generator->setGridSize(5, 5);
-	generator->generate(0x09E73, Decoration::Arrow, 2, Decoration::Dot, 13);
+	generator->generate(0x09E73, Decoration::Arrow, 2, Decoration::Dot_Intersection, 13);
 	generator->generate(0x09E75, Decoration::Arrow, 2, Decoration::Stone | Decoration::Color::Black, 5, Decoration::Stone | Decoration::Color::White, 5);
 	generator->generate(0x09E78, Decoration::Arrow, 2, Decoration::Star | Decoration::Color::Black, 4, Decoration::Star | Decoration::Color::White, 6);
 	generator->generate(0x09E79, Decoration::Arrow, 2, Decoration::Poly | Decoration::Can_Rotate | Decoration::Color::Green, 2, Decoration::Poly | Decoration::Color::Green, 1, Decoration::Gap, 7);
