@@ -24,7 +24,7 @@ public:
 	enum Shape : int {
 		Exit =		0x600001,
 		Start =		0x600002,
-		Stone =		0x100,
+		Stone =		0x100,//Start of Symbols
 		Star =		0x200,
 		Poly =		0x400,
 		Eraser =	0x500,
@@ -38,7 +38,7 @@ public:
 		Arrow2 = 0x2700,
 		Arrow3 = 0x3700,
 		Can_Rotate = 0x1000,
-		Negative = 0x2000,
+		Negative = 0x2000,//End of SymbolsW
 		Gap = 0x100000,
 		Gap_Row = 0x300000,
 		Gap_Column = 0x500000,
@@ -46,6 +46,50 @@ public:
 		Dot_Row = 0x240020,
 		Dot_Column = 0x440020,
 		Dot_Intersection = 0x600020,
+		Mine = 0x1000000,
+		Mine1 = 0x1010000,
+		Mine2 = 0x1020000,
+		Mine3 = 0x1030000,
+		Mine4 = 0x1040000,
+		Mine5 = 0x1050000,
+		Mine6 = 0x1060000,
+		Mine7 = 0x1070000,
+		Mine8 = 0x1080000,
+		Mine9 = 0x1090000,
+		Head = 0x2000000,
+		Mushroom = 0x3000000,
+		Ghost = 0x4000000,
+		Bar = 0x5000000,
+		BarUR = 0x5010000,
+		BarDR = 0x5020000,
+		BarDL = 0x5030000,
+		BarUL = 0x5040000,
+		BarTD = 0x5050000,
+		BarTL = 0x5060000,
+		BarTU = 0x5070000,
+		BarTR = 0x5080000,
+		BarPlus = 0x5090000,
+		BarV = 0x50A0000,
+		BarH = 0x50B0000,
+		Antitriangle = 0x6000000,
+		Antitriangle1 = 0x6010000,
+		Antitriangle2 = 0x6020000,
+		Antitriangle3 = 0x6030000,
+		Antitriangle4 = 0x6040000,
+		Dart = 0x7000000,
+		Dart1 = 0x7010000,
+		Dart2 = 0x7020000,
+		Dart3 = 0x7030000,
+		Dart4 = 0x7040000,
+		Rain = 0x8000000,
+		Pointer = 0x9000000,
+		NewSymbolsA = 0xA000000,
+		NewSymbolsB = 0xB000000,
+		NewSymbolsC = 0xC000000,
+		NewSymbolsD = 0xD000000,
+		NewSymbolsE = 0xE000000,
+		NewSymbolsF = 0xF000000,
+
 		Empty = 0xA00,
 	};
 	enum Color : int {
@@ -212,7 +256,7 @@ private:
 	Point get_sym_point(Point p) { return get_sym_point(p.first, p.second, symmetry); }
 	Point get_sym_point(Point p, Symmetry symmetry) { return get_sym_point(p.first, p.second, symmetry); }
 	Endpoint::Direction get_sym_dir(Endpoint::Direction direction, Symmetry symmetry) {
-		int dirIndex;
+		int dirIndex = 0;
 		if (direction == Endpoint::Direction::LEFT) dirIndex = 0;
 		if (direction == Endpoint::Direction::RIGHT) dirIndex = 1;
 		if (direction == Endpoint::Direction::UP) dirIndex = 2;
@@ -421,6 +465,769 @@ private:
 			polygons.push_back(polys[i] + baseIndex);
 		}
 	}
+
+	void render_mine(int x, int y,int num, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {
+		std::vector<float> positions = {};
+		std::vector<int> polys = {};
+		std::vector<float> positions_upper = { 0.35f, 0.8f, 0.4f, 0.85f, 0.6f, 0.85f, 0.65f, 0.8f, 0.6f, 0.75f, 0.4f, 0.75f };
+		std::vector<float> positions_middle = { 0.35f, 0.5f, 0.4f, 0.55f, 0.6f, 0.55f, 0.65f, 0.5f, 0.6f, 0.45f, 0.4f, 0.45f };
+		std::vector<float> positions_lower = { 0.35f, 0.2f, 0.4f, 0.25f, 0.6f, 0.25f, 0.65f, 0.2f, 0.6f, 0.15f, 0.4f, 0.15f };
+		std::vector<float> positions_upper_left = { 0.35f, 0.8f, 0.4f, 0.75f, 0.4f, 0.55f, 0.35f, 0.5f, 0.3f, 0.55f, 0.3f, 0.75f };
+		std::vector<float> positions_upper_right = { 0.65f, 0.8f, 0.7f, 0.75f, 0.7f, 0.55f, 0.65f, 0.5f, 0.6f, 0.55f, 0.6f, 0.75f };
+		std::vector<float> positions_lower_left = { 0.35f, 0.5f, 0.4f, 0.45f, 0.4f, 0.25f, 0.35f, 0.2f, 0.3f, 0.25f, 0.3f, 0.45f };
+		std::vector<float> positions_lower_right = { 0.65f, 0.5f, 0.7f, 0.45f, 0.7f, 0.25f, 0.65f, 0.2f, 0.6f, 0.25f, 0.6f, 0.45f };
+		std::vector<int> polys_basic = { 0, 1, 2, 0, 0, 2, 3, 0, 0, 3, 4, 0, 0, 4, 5, 0, };
+		std::vector<int> NUMINDICATE = {
+			0b1011111,//0
+			0b0000101,//1
+			0b1110110,//2
+			0b1110101,//3
+			0b0101101,//4
+			0b1111001,//5
+			0b1111011,//6
+			0b1001101,//7
+			0b1111111,//8
+			0b1111101,//9
+		};
+		std::vector<std::vector<float>> positions_list ={ positions_upper,
+			positions_middle,
+			positions_lower,
+			positions_upper_left,
+			positions_upper_right,
+			positions_lower_left,
+			positions_lower_right,
+		};
+
+		//shouldn't touch it.
+		for (int i = 0; i < 7; i++) {
+			if ((NUMINDICATE[num] >> i) % 2 == 1) {
+				positions.insert(positions.end(), positions_list[6 - i].begin(), positions_list[6 - i].end());
+			};
+		};
+		for (int i = 0; i < positions.size() / 2; i += 6)
+		{
+			for (int j = 0; j < polys_basic.size(); j++) {
+				if (j % 4 == 3) {
+					polys.push_back(0);
+				}
+				else {
+					polys.push_back(polys_basic[j] + i);
+				}
+			}
+		}
+		for (int i = 0; i < positions.size(); i += 2) {
+			//Translate to center
+			positions[i] -= 0.5f;
+			positions[i + 1] -= 0.5f;
+			//Scale
+			positions[i] *= unitHeight * 1.5f;
+			positions[i + 1] *= unitHeight * 1.5f;
+			//Translate to correct position
+			positions[i] += intersections[xy_to_loc(x, y) * 2] + unitWidth;
+			positions[i + 1] += intersections[xy_to_loc(x, y) * 2 + 1] - unitWidth;
+		};
+		int baseIndex = static_cast<int>(intersectionFlags.size());
+		
+		for (int i = 0; i < positions.size(); i++) {
+			intersections.push_back(positions[i]);
+			if (i % 2 == 0) intersectionFlags.push_back(IntersectionFlags::NO_POINT);
+		};
+		for (int i = 0; i < polys.size(); i++) {
+			polygons.push_back(polys[i] + baseIndex);
+		};
+	};
+
+	void render_head(int x, int y, int num, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {
+		if (num == 9) return;
+		std::vector<float> positions = {
+		0.5f,0.7f,
+		0.45f, 0.9f,
+		0.4f, 0.88f,
+		0.35f, 0.85f,
+		0.3f, 0.8f,
+		0.25f, 0.72f,
+		0.2f, 0.6f,
+		0.15f, 0.55f,
+		0.1f, 0.5f,
+		0.2f, 0.51f,
+		0.25f, 0.54f,
+		0.275f, 0.4f,
+		0.3f, 0.3f,
+		0.35f, 0.25f,
+		0.4f, 0.235f,
+		0.45f, 0.22f,
+		0.5f, 0.21f,
+		0.55f, 0.22f,
+		0.6f, 0.235f,
+		0.65f, 0.25f,
+		0.7f, 0.3f,
+		0.725f, 0.4f,
+		0.75f, 0.54f,
+		0.8f, 0.51f,
+		0.9f, 0.5f,
+		0.85f, 0.55f,
+		0.8f, 0.6f,
+		0.75f, 0.72f,
+		0.7f, 0.8f,
+		0.65f, 0.85f,
+		0.6f, 0.88f,
+		0.55f, 0.9f,
+		0.45f, 0.9f,
+		};
+		std::vector<int> polys_basic = { 0, 1, 2, 0};
+		std::vector<int> polys = {};
+		std::vector<int> angles = { -90, 90, 0, 180, -45, 45, 135, -135 };
+		float angle = (angles[num] - 90) * 3.141592653589793238f / 180;
+
+		for (int i = 0; i < positions.size() / 2; i += 1)
+		{
+			if (i + 2 >= positions.size() / 2) break;
+			for (int j = 0; j < polys_basic.size(); j++) {
+				if (j % 4 == 0 || j % 4 == 3) {
+					polys.push_back(0);
+				}
+				else {
+					polys.push_back(polys_basic[j] + i);
+				}
+			}
+		}
+
+		//shouldn't touch it.
+		for (int i = 0; i < positions.size(); i += 2) {
+			//Translate to center
+			positions[i] -= 0.5f;
+			positions[i + 1] -= 0.5f;
+			//Scale
+			positions[i] *= unitHeight * 1.5f;
+			positions[i + 1] *= unitHeight * 1.5f;
+			//Rotate
+			float newx = positions[i] * cos(angle) - positions[i + 1] * sin(angle);
+			float newy = positions[i] * sin(angle) + positions[i + 1] * cos(angle);
+			positions[i] = newx; positions[i + 1] = newy;
+			//Translate to correct position
+			positions[i] += intersections[xy_to_loc(x, y) * 2] + unitWidth;
+			positions[i + 1] += intersections[xy_to_loc(x, y) * 2 + 1] - unitWidth;
+		};
+		int baseIndex = static_cast<int>(intersectionFlags.size());
+		for (int i = 0; i < positions.size(); i++) {
+			intersections.push_back(positions[i]);
+			if (i % 2 == 0) intersectionFlags.push_back(IntersectionFlags::NO_POINT);
+		};
+		for (int i = 0; i < polys.size(); i++) {
+			polygons.push_back(polys[i] + baseIndex);
+		};
+	};
+
+	void render_mushroom(int x, int y, int num, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {
+		std::vector<float> positions = {
+			0.5f,0.6f,
+			0.5f, 0.8f,
+			0.3f, 0.78f,
+			0.2f, 0.7f,
+			0.1f, 0.6f,
+			0.16f, 0.53f,
+			0.42f, 0.5f,
+			0.4f, 0.2f,
+			0.45f, 0.16f,
+			0.5f, 0.15f,
+			0.55f, 0.16f,
+			0.6f, 0.2f,
+			0.58f, 0.5f,
+			0.84f, 0.53f,
+			0.9f, 0.6f,
+			0.8f, 0.7f,
+			0.7f, 0.78f,
+			0.5f, 0.8f,
+		};
+		std::vector<int> polys_basic = { 0, 1, 2, 0 };
+		std::vector<int> polys = {};
+
+		for (int i = 0; i < positions.size() / 2; i += 1)
+		{
+			if (i + 2 >= positions.size() / 2) break;
+			for (int j = 0; j < polys_basic.size(); j++) {
+				if (j % 4 == 0 || j % 4 == 3) {
+					polys.push_back(0);
+				}
+				else {
+					polys.push_back(polys_basic[j] + i);
+				}
+			}
+		}
+
+		//shouldn't touch it.
+		for (int i = 0; i < positions.size(); i += 2) {
+			//Translate to center
+			positions[i] -= 0.5f;
+			positions[i + 1] -= 0.5f;
+			//Scale
+			positions[i] *= unitHeight * 1.5f;
+			positions[i + 1] *= unitHeight * 1.5f;
+			//Translate to correct position
+			positions[i] += intersections[xy_to_loc(x, y) * 2] + unitWidth;
+			positions[i + 1] += intersections[xy_to_loc(x, y) * 2 + 1] - unitWidth;
+		};
+		int baseIndex = static_cast<int>(intersectionFlags.size());
+		for (int i = 0; i < positions.size(); i++) {
+			intersections.push_back(positions[i]);
+			if (i % 2 == 0) intersectionFlags.push_back(IntersectionFlags::NO_POINT);
+		};
+		for (int i = 0; i < polys.size(); i++) {
+			polygons.push_back(polys[i] + baseIndex);
+		};
+	};
+	
+	void render_ghost(int x, int y, int num, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {
+		std::vector<float> positions = {
+		0.5f, 0.9f,
+		0.4f, 0.65f,
+		0.4f, 0.88f,
+		0.38f, 0.68f,
+		0.3f, 0.8f,
+		0.32f, 0.68f,
+		0.25f, 0.7f,
+		0.3f, 0.65f,
+		0.225f, 0.65f,
+		0.32f, 0.62f,
+		0.2f, 0.6f,
+		0.35f, 0.6f,
+		0.1f, 0.2f,
+		0.3f, 0.3f,
+		0.35f, 0.6f,
+		0.4f, 0.2f,
+		0.35f, 0.6f,
+		0.5f, 0.3f,
+		0.38f, 0.62f,
+		0.5f, 0.5f,
+		0.4f, 0.65f,
+		0.5f, 0.7f,
+		0.5f, 0.9f,
+		};
+
+		int points_size = 23;
+
+		std::vector<int> polys_basic = { 0, 1, 2, 0 };
+		std::vector<int> polys = {};
+		std::vector<float> positions_r = {};
+		for (int i = 0; i < points_size * 2; i += 2) {
+			positions_r.push_back(1 - positions[i]);
+			positions_r.push_back(positions[i + 1]);
+		};
+
+		for (float r: positions_r) {
+			positions.push_back(r);
+		};
+
+		for (int i = 0; i + 2 < points_size; i += 1)
+		{
+			for (int j = 0; j < polys_basic.size(); j++) {
+				if (j % 4 == 3) {
+					polys.push_back(0);
+				}
+				else {
+					polys.push_back(polys_basic[j] + i);
+				}
+			}
+		}
+
+		for (int i = 0; i + 2 < points_size; i += 1)
+		{
+			for (int j = 0; j < polys_basic.size(); j++) {
+				if (j % 4 == 3) {
+					polys.push_back(0);
+				}
+				else {
+					polys.push_back(polys_basic[j] + points_size + i);
+				}
+			}
+		}
+
+		//shouldn't touch it.
+		for (int i = 0; i < positions.size(); i += 2) {
+			//Translate to center
+			positions[i] -= 0.5f;
+			positions[i + 1] -= 0.5f;
+			//Scale
+			positions[i] *= unitHeight * 1.5f;
+			positions[i + 1] *= unitHeight * 1.5f;
+			//Translate to correct position
+			positions[i] += intersections[xy_to_loc(x, y) * 2] + unitWidth;
+			positions[i + 1] += intersections[xy_to_loc(x, y) * 2 + 1] - unitWidth;
+		};
+		int baseIndex = static_cast<int>(intersectionFlags.size());
+		for (int i = 0; i < positions.size(); i++) {
+			intersections.push_back(positions[i]);
+			if (i % 2 == 0) intersectionFlags.push_back(IntersectionFlags::NO_POINT);
+		};
+		for (int i = 0; i < polys.size(); i++) {
+			polygons.push_back(polys[i] + baseIndex);
+		};
+	};
+
+	void render_bar(int x, int y, int num, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {
+		std::vector<float> positions = { 0.4f, 0.4f, 0.4f, 0.6f, 0.6f, 0.6f, 0.6f, 0.4f };
+		std::vector<int> polys = { 0, 1, 2, 0, 0, 2, 3, 0, };
+		int point_count = 5;
+		std::vector<float> positions_top =    { 0.5f, 0.5f, 0.4f, 0.6f, 0.4f, 0.9f, 0.6f, 0.9f, 0.6f, 0.6f};
+		std::vector<float> positions_right =  { 0.5f, 0.5f, 0.6f, 0.6f, 0.9f, 0.6f, 0.9f, 0.4f, 0.6f, 0.4f };
+		std::vector<float> positions_bottom = { 0.5f, 0.5f, 0.6f, 0.4f, 0.6f, 0.1f, 0.4f, 0.1f, 0.4f, 0.4f };
+		std::vector<float> positions_left =   { 0.5f, 0.5f, 0.4f, 0.4f, 0.1f, 0.4f, 0.1f, 0.6f, 0.4f, 0.6f };
+		std::vector<int> polys_basic = { 4, 5, 6, 0, 4, 6, 7, 0, 4, 7, 8, 0,};
+		//0:X(null) 1:(OOCC) 2:(COOC) 3:(CCOO) 4:(OCCO) 5:(COOO) 6:(OCOO) 7:(OOCO) 8:(OOOC) 9:(OOOO) A:(OCOC) B:(COCO) C:Gap_Column D:Gap_Row
+		std::vector<int> NUMINDICATE = {
+			0b0000,//0
+			0b1100,//1
+			0b0110,//2
+			0b0011,//3
+			0b1001,//4
+			0b0111,//5
+			0b1011,//6
+			0b1101,//7
+			0b1110,//8
+			0b1111,//9
+			0b1010,//A
+			0b0101,//B
+			0b1010,//CGap
+			0b0101,//DGap
+		};
+		std::vector<std::vector<float>> positions_list = { positions_top,
+			positions_right,
+			positions_bottom,
+			positions_left,
+		};
+
+		//shouldn't touch it.
+		for (int i = 0; i < 4; i++) {
+			if ((NUMINDICATE[num] >> i) % 2 == 1) {
+				positions.insert(positions.end(), positions_list[positions_list.size() - 1 - i].begin(), positions_list[positions_list.size() - 1 - i].end());
+			};
+		};
+		for (int i = 0; i < positions.size() / 2; i += point_count)
+		{
+			for (int j = 0; j < polys_basic.size(); j++) {
+				if (j % 4 == 3) {
+					polys.push_back(0);
+				}
+				else {
+					polys.push_back(polys_basic[j] + i);
+				}
+			}
+		}
+		for (int i = 0; i < positions.size(); i += 2) {
+			//Translate to center
+			positions[i] -= 0.5f;
+			positions[i + 1] -= 0.5f;
+			//Scale
+			positions[i] *= unitHeight * 1.5f;
+			positions[i + 1] *= unitHeight * 1.5f;
+			//Translate to correct position
+			positions[i] += intersections[xy_to_loc(x, y) * 2] + unitWidth;
+			positions[i + 1] += intersections[xy_to_loc(x, y) * 2 + 1] - unitWidth;
+		};
+		int baseIndex = static_cast<int>(intersectionFlags.size());
+
+		for (int i = 0; i < positions.size(); i++) {
+			intersections.push_back(positions[i]);
+			if (i % 2 == 0) intersectionFlags.push_back(IntersectionFlags::NO_POINT);
+		};
+		for (int i = 0; i < polys.size(); i++) {
+			polygons.push_back(polys[i] + baseIndex);
+		};
+	};
+	
+	void render_antitriangle(int x, int y, int num, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {
+		std::vector<float> positions = {};
+		std::vector<int> polys = {};
+		int point_count = 3;
+		float x_padding = 0;
+		float y_padding = 0;
+		std::vector<int> polys_basic = { 0, 1, 2, 0 };
+
+		if(num == 1){
+			positions = { 0.5f, 0.3f,
+				0.5f + 0.17320508f, 0.6f,
+				0.5f - 0.17320508f, 0.6f };
+		}
+		else if (num == 2){
+				x_padding = -0.2f;
+				std::vector<float> triangle_1 = { 0.5f + x_padding, 0.3f + y_padding,
+					0.5f + x_padding + 0.17320508f, 0.6f + y_padding,
+					0.5f + x_padding - 0.17320508f, 0.6f + y_padding };
+				positions.insert(positions.end(), triangle_1.begin(), triangle_1.end());
+				x_padding = 0.2f;
+				std::vector<float> triangle_2 = { 0.5f + x_padding, 0.3f + y_padding,
+					0.5f + x_padding + 0.17320508f, 0.6f + y_padding,
+					0.5f + x_padding - 0.17320508f, 0.6f + y_padding };
+				positions.insert(positions.end(), triangle_2.begin(), triangle_2.end());
+		}
+		else if (num == 3) {
+				positions = { 0.5f + x_padding, 0.3f,
+					0.5f + 0.17320508f, 0.6f,
+					0.5f - 0.17320508f, 0.6f};
+				x_padding = -0.4f;
+				std::vector<float> triangle_B = { 0.5f + x_padding, 0.3f + y_padding,
+					0.5f + x_padding + 0.17320508f, 0.6f + y_padding,
+					0.5f + x_padding - 0.17320508f, 0.6f + y_padding };
+				positions.insert(positions.end(), triangle_B.begin(), triangle_B.end());
+				x_padding = 0.4f;
+				std::vector<float> triangle_C = { 0.5f + x_padding, 0.3f + y_padding,
+					0.5f + x_padding + 0.17320508f, 0.6f + y_padding,
+					0.5f + x_padding - 0.17320508f, 0.6f + y_padding };
+				positions.insert(positions.end(), triangle_C.begin(), triangle_C.end());
+		}
+		else if (num == 4) {
+				x_padding = 0.2f;
+				y_padding = 0.2f;
+				std::vector<float> triangle_a = { 0.5f + x_padding, 0.3f + y_padding,
+					0.5f + x_padding + 0.17320508f, 0.6f + y_padding,
+					0.5f + x_padding - 0.17320508f, 0.6f + y_padding };
+				positions.insert(positions.end(), triangle_a.begin(), triangle_a.end());
+				x_padding = 0.2f;
+				y_padding = -0.2f;
+				std::vector<float> triangle_b = { 0.5f + x_padding, 0.3f + y_padding,
+					0.5f + x_padding + 0.17320508f, 0.6f + y_padding,
+					0.5f + x_padding - 0.17320508f, 0.6f + y_padding };
+				positions.insert(positions.end(), triangle_b.begin(), triangle_b.end());
+				x_padding = -0.2f;
+				y_padding = 0.2f;
+				std::vector<float> triangle_c = { 0.5f + x_padding, 0.3f + y_padding,
+					0.5f + x_padding + 0.17320508f, 0.6f + y_padding,
+					0.5f + x_padding - 0.17320508f, 0.6f + y_padding };
+				positions.insert(positions.end(), triangle_c.begin(), triangle_c.end());
+				x_padding = -0.2f;
+				y_padding = -0.2f;
+				std::vector<float> triangle_d = { 0.5f + x_padding, 0.3f + y_padding,
+					0.5f + x_padding + 0.17320508f, 0.6f + y_padding,
+					0.5f + x_padding - 0.17320508f, 0.6f + y_padding };
+				positions.insert(positions.end(), triangle_d.begin(), triangle_d.end());
+		}
+
+
+		//shouldn't touch it.
+		for (int i = 0; i < positions.size() / 2; i += point_count)
+		{
+			for (int j = 0; j < polys_basic.size(); j++) {
+				if (j % 4 == 3) {
+					polys.push_back(0);
+				}
+				else {
+					polys.push_back(polys_basic[j] + i);
+				}
+			}
+		}
+		for (int i = 0; i < positions.size(); i += 2) {
+			//Translate to center
+			positions[i] -= 0.5f;
+			positions[i + 1] -= 0.5f;
+			//Scale
+			positions[i] *= unitHeight * 1.5f;
+			positions[i + 1] *= unitHeight * 1.5f;
+			//Translate to correct position
+			positions[i] += intersections[xy_to_loc(x, y) * 2] + unitWidth;
+			positions[i + 1] += intersections[xy_to_loc(x, y) * 2 + 1] - unitWidth;
+		};
+		int baseIndex = static_cast<int>(intersectionFlags.size());
+		for (int i = 0; i < positions.size(); i++) {
+			intersections.push_back(positions[i]);
+			if (i % 2 == 0) intersectionFlags.push_back(IntersectionFlags::NO_POINT);
+		};
+		for (int i = 0; i < polys.size(); i++) {
+			polygons.push_back(polys[i] + baseIndex);
+		};
+	};
+
+	void render_dart(int x, int y, int count, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {
+		std::vector<float> positions = {};
+		std::vector<int> polys = {};
+		int point_count = 4;  //number of point
+		float x_padding = 0;
+		float y_padding = 0;
+		std::vector<int> polys_basic = { 0, 1, 3, 0, 0, 2, 3, 0};
+		if (count == 1) {
+			positions = { 0.5f, 0.3f,
+				0.5f + 0.17320508f, 0.6f,
+				0.5f - 0.17320508f, 0.6f,
+				0.5f, 0.5f };
+		}
+		else if (count == 2) {
+			x_padding = -0.2f;
+			std::vector<float> triangle_1 = { 0.5f + x_padding, 0.3f + y_padding,
+				0.5f + x_padding + 0.17320508f, 0.6f + y_padding,
+				0.5f + x_padding - 0.17320508f, 0.6f + y_padding,
+				0.5f + x_padding, 0.5f + y_padding};
+			positions.insert(positions.end(), triangle_1.begin(), triangle_1.end());
+			x_padding = 0.2f;
+			std::vector<float> triangle_2 = { 0.5f + x_padding, 0.3f + y_padding,
+				0.5f + x_padding + 0.17320508f, 0.6f + y_padding,
+				0.5f + x_padding - 0.17320508f, 0.6f + y_padding,
+				0.5f + x_padding, 0.5f + y_padding };
+			positions.insert(positions.end(), triangle_2.begin(), triangle_2.end());
+		}
+		else if (count == 3) {
+			positions = { 0.5f + x_padding, 0.3f,
+				0.5f + 0.17320508f, 0.6f,
+				0.5f - 0.17320508f, 0.6f,
+				0.5f, 0.5f, };
+			x_padding = -0.4f;
+			std::vector<float> triangle_B = { 0.5f + x_padding, 0.3f + y_padding,
+				0.5f + x_padding + 0.17320508f, 0.6f + y_padding,
+				0.5f + x_padding - 0.17320508f, 0.6f + y_padding,
+				0.5f + x_padding, 0.5f + y_padding };
+			positions.insert(positions.end(), triangle_B.begin(), triangle_B.end());
+			x_padding = 0.4f;
+			std::vector<float> triangle_C = { 0.5f + x_padding, 0.3f + y_padding,
+				0.5f + x_padding + 0.17320508f, 0.6f + y_padding,
+				0.5f + x_padding - 0.17320508f, 0.6f + y_padding,
+				0.5f + x_padding, 0.5f + y_padding };
+			positions.insert(positions.end(), triangle_C.begin(), triangle_C.end());
+		}
+		else if (count == 4) {
+			x_padding = 0.2f;
+			y_padding = 0.2f;
+			std::vector<float> triangle_a = { 0.5f + x_padding, 0.3f + y_padding,
+				0.5f + x_padding + 0.17320508f, 0.6f + y_padding,
+				0.5f + x_padding - 0.17320508f, 0.6f + y_padding,
+				0.5f + x_padding, 0.5f + y_padding };
+			positions.insert(positions.end(), triangle_a.begin(), triangle_a.end());
+			x_padding = 0.2f;
+			y_padding = -0.2f;
+			std::vector<float> triangle_b = { 0.5f + x_padding, 0.3f + y_padding,
+				0.5f + x_padding + 0.17320508f, 0.6f + y_padding,
+				0.5f + x_padding - 0.17320508f, 0.6f + y_padding,
+				0.5f + x_padding, 0.5f + y_padding };
+			positions.insert(positions.end(), triangle_b.begin(), triangle_b.end());
+			x_padding = -0.2f;
+			y_padding = 0.2f;
+			std::vector<float> triangle_c = { 0.5f + x_padding, 0.3f + y_padding,
+				0.5f + x_padding + 0.17320508f, 0.6f + y_padding,
+				0.5f + x_padding - 0.17320508f, 0.6f + y_padding,
+				0.5f + x_padding, 0.5f + y_padding };
+			positions.insert(positions.end(), triangle_c.begin(), triangle_c.end());
+			x_padding = -0.2f;
+			y_padding = -0.2f;
+			std::vector<float> triangle_d = { 0.5f + x_padding, 0.3f + y_padding,
+				0.5f + x_padding + 0.17320508f, 0.6f + y_padding,
+				0.5f + x_padding - 0.17320508f, 0.6f + y_padding,
+				0.5f + x_padding, 0.5f + y_padding };
+			positions.insert(positions.end(), triangle_d.begin(), triangle_d.end());
+		}
+		else {
+			positions = { 0.2f, 0.3f,
+			0.2f + 0.17320508f, 0.6f,
+			0.2f - 0.17320508f, 0.6f,
+			0.2f, 0.2f };
+		}
+
+		//shouldn't touch it.
+		for (int i = 0; i < positions.size() / 2; i += point_count)
+		{
+			for (int j = 0; j < polys_basic.size(); j++) {
+				if (j % 4 == 3) {
+					polys.push_back(0);
+				}
+				else {
+					polys.push_back(polys_basic[j] + i);
+				}
+			}
+		}
+		for (int i = 0; i < positions.size(); i += 2) {
+			//Translate to center
+			positions[i] -= 0.5f;
+			positions[i + 1] -= 0.5f;
+			//Scale
+			positions[i] *= unitHeight * 1.5f;
+			positions[i + 1] *= unitHeight * 1.5f;
+			//Rotate
+			std::vector<int> angles = { 0, -180, 90, -90, 45, 135, -135, -45 };
+			float angle = angles[dir] * 3.141592653589793238f / 180;
+			float newx = positions[i] * cos(angle) - positions[i + 1] * sin(angle);
+			float newy = positions[i] * sin(angle) + positions[i + 1] * cos(angle);
+			positions[i] = newx; positions[i + 1] = newy;
+			//Translate to correct position
+			positions[i] += intersections[xy_to_loc(x, y) * 2] + unitWidth;
+			positions[i + 1] += intersections[xy_to_loc(x, y) * 2 + 1] - unitWidth;
+		};
+		int baseIndex = static_cast<int>(intersectionFlags.size());
+		for (int i = 0; i < positions.size(); i++) {
+			intersections.push_back(positions[i]);
+			if (i % 2 == 0) intersectionFlags.push_back(IntersectionFlags::NO_POINT);
+		};
+		for (int i = 0; i < polys.size(); i++) {
+			polygons.push_back(polys[i] + baseIndex);
+		};
+	};
+
+	void render_rain(int x, int y, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {
+		std::vector<float> positions = {
+			0.5f,0.7f,
+			0.5f, 0.9f,
+			0.4f, 0.8f,
+			0.35f, 0.7f,
+			0.3f, 0.6f,
+			0.25f, 0.5f,
+			0.22f, 0.4f,
+			0.23f, 0.3f,
+			0.3f, 0.2f,
+			0.4f, 0.15f,
+			0.5f, 0.1f,
+			0.6f, 0.15f,
+			0.7f, 0.2f,
+			0.77f, 0.3f,
+			0.78f, 0.4f,
+			0.75f, 0.5f,
+			0.7f, 0.6f,
+			0.65f, 0.7f,
+			0.6f, 0.8f,
+			0.5f, 0.9f,
+		};
+		std::vector<int> polys_basic = { 0, 1, 2, 0 };
+		std::vector<int> polys = {};
+		std::vector<int> angles = { -90, 90, 0, 180, -45, 45, 135, -135 };
+		float angle = (angles[dir] + 90) * 3.141592653589793238f / 180;
+
+		for (int i = 0; i < positions.size() / 2; i += 1)
+		{
+			if (i + 2 >= positions.size() / 2) break;
+			for (int j = 0; j < polys_basic.size(); j++) {
+				if (j % 4 == 0 || j % 4 == 3) {
+					polys.push_back(0);
+				}
+				else {
+					polys.push_back(polys_basic[j] + i);
+				}
+			}
+		}
+
+		//shouldn't touch it.
+		for (int i = 0; i < positions.size(); i += 2) {
+			//Translate to center
+			positions[i] -= 0.5f;
+			positions[i + 1] -= 0.5f;
+			//Scale
+			positions[i] *= unitHeight * 1.5f;
+			positions[i + 1] *= unitHeight * 1.5f;
+			//Rotate
+			float newx = positions[i] * cos(angle) - positions[i + 1] * sin(angle);
+			float newy = positions[i] * sin(angle) + positions[i + 1] * cos(angle);
+			positions[i] = newx; positions[i + 1] = newy;
+			//Translate to correct position
+			positions[i] += intersections[xy_to_loc(x, y) * 2] + unitWidth;
+			positions[i + 1] += intersections[xy_to_loc(x, y) * 2 + 1] - unitWidth;
+		};
+		int baseIndex = static_cast<int>(intersectionFlags.size());
+		for (int i = 0; i < positions.size(); i++) {
+			intersections.push_back(positions[i]);
+			if (i % 2 == 0) intersectionFlags.push_back(IntersectionFlags::NO_POINT);
+		};
+		for (int i = 0; i < polys.size(); i++) {
+			polygons.push_back(polys[i] + baseIndex);
+		};
+	};
+
+	void render_pointer(int x, int y, int type, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {
+		std::vector<float> positions = {};
+		std::vector<int> polys = {};
+		std::vector<float> up = { 
+			0.5f, 0.9f,
+			0.6f, 0.8f,
+			0.4f, 0.8f,
+			0.55f, 0.8f,
+			0.45f, 0.8f,
+			0.55f, 0.45f,
+			0.45f, 0.45f,
+			};
+		std::vector<float> down = {
+			0.5f, 0.1f,
+			0.6f, 0.2f,
+			0.4f, 0.2f,
+			0.55f, 0.2f,
+			0.45f, 0.2f,
+			0.55f, 0.55f,
+			0.45f, 0.55f,
+		};
+		std::vector<float> left = {
+			0.1f, 0.5f,
+			0.2f, 0.6f,
+			0.2f, 0.4f,
+			0.2f, 0.55f,
+			0.2f, 0.45f,
+			0.55f, 0.55f,
+			0.55f, 0.45f,
+		};
+		std::vector<float> right = {
+			0.9f, 0.5f,
+			0.8f, 0.6f,
+			0.8f, 0.4f,
+			0.8f, 0.55f,
+			0.8f, 0.45f,
+			0.45f, 0.55f,
+			0.45f, 0.45f,
+		};
+		std::vector<int> polys_basic = { 0, 1, 2, 0, 3, 4, 6, 0, 3, 5, 6, 0};
+		std::vector<std::vector<float>> positions_list = { up,down,left,right };
+
+		//shouldn't touch it.
+		for (int i = 0; i < 4; i++) {
+			if ((type >> i) % 2 == 1) {
+				positions.insert(positions.end(), positions_list[i].begin(), positions_list[i].end());
+			};
+		};
+		for (int i = 0; i < positions.size() / 2; i += 7)
+		{
+			for (int j = 0; j < polys_basic.size(); j++) {
+				if (j % 4 == 3) {
+					polys.push_back(0);
+				}
+				else {
+					polys.push_back(polys_basic[j] + i);
+				}
+			}
+		}
+		for (int i = 0; i < positions.size(); i += 2) {
+			//Translate to center
+			positions[i] -= 0.5f;
+			positions[i + 1] -= 0.5f;
+			//Scale
+			positions[i] *= unitHeight * 1.5f;
+			positions[i + 1] *= unitHeight * 1.5f;
+			//Translate to correct position
+			positions[i] += intersections[xy_to_loc(x, y) * 2] + unitWidth;
+			positions[i + 1] += intersections[xy_to_loc(x, y) * 2 + 1] - unitWidth;
+		};
+		int baseIndex = static_cast<int>(intersectionFlags.size());
+
+		for (int i = 0; i < positions.size(); i++) {
+			intersections.push_back(positions[i]);
+			if (i % 2 == 0) intersectionFlags.push_back(IntersectionFlags::NO_POINT);
+		};
+		for (int i = 0; i < polys.size(); i++) {
+			polygons.push_back(polys[i] + baseIndex);
+		};
+	};	
+	
+	void render_newsymbolsA(int x, int y, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {
+
+	};	
+	
+	void render_newsymbolsB(int x, int y, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {
+
+	};	
+	
+	void render_newsymbolsC(int x, int y, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {
+
+	};	
+	
+	void render_newsymbolsD(int x, int y, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {
+
+	};
+
+	void render_newsymbolsE(int x, int y, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {
+
+	};
+
+	void render_newsymbolsF(int x, int y, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {
+
+	};
 
 	std::shared_ptr<Memory> _memory;
 
