@@ -28,7 +28,12 @@ void Randomizer::GenerateNormal(HWND loadingHandle) {
 	puzzles->setLoadingHandle(loadingHandle);
 	puzzles->setSeed(seed, seedIsRNG, colorblind);
 	puzzles->GenerateAllN();
-	if (doubleMode) ShufflePanels(false);
+	if (doubleMode) ShufflePanels(true);
+	SetWindowText(loadingHandle, L"Starting watchdogs...");
+	Panel::StartArrowWatchdogs(_shuffleMapping);
+	SetWindowText(loadingHandle, L"Done!");
+	if (!Special::hasBeenRandomized())
+		MessageBox(GetActiveWindow(), L"Welcome to the abyss.", L"Go.", MB_OK);
 }
 
 void Randomizer::GenerateHard(HWND loadingHandle) {
@@ -41,12 +46,7 @@ void Randomizer::GenerateHard(HWND loadingHandle) {
 	Panel::StartArrowWatchdogs(_shuffleMapping);
 	SetWindowText(loadingHandle, L"Done!");
 	if (!Special::hasBeenRandomized())
-		MessageBox(GetActiveWindow(), L"Hi there! Thanks for trying out Expert Mode. It will be tough, but I hope you have fun!\r\n\r\n"
-		L"Expert has some unique tricks up its sleeve. You will encounter some situations that may seem impossible at first glance. "
-		L"In these situations, try to think of alternate approaches that weren't required in the base game.\r\n\r\n"
-		L"For especially tough puzzles, the Solver folder has a solver that works for most puzzles, though it currently has some trouble with Erasers.\r\n\r\n"
-		L"The Github wiki also has a Hints page that can help with certain tricky puzzles.\r\n\r\n"
-		L"Thanks for playing, and good luck!", L"Welcome", MB_OK);
+		MessageBox(GetActiveWindow(), L"Welcome to the abyss.", L"Go.", MB_OK);
 }
 
 template <class T>
@@ -59,17 +59,17 @@ int find(const std::vector<T> &data, T search, size_t startIndex = 0) {
 }
 
 void Randomizer::AdjustSpeed() {
-	_memory->WritePanelData<float>(0x09F95, OPEN_RATE, { 0.04f });  // Desert Surface Final Control, 4x
-	_memory->WritePanelData<float>(0x03839, OPEN_RATE, { 0.7f }); // Mill Ramp, 3x
-	_memory->WritePanelData<float>(0x021BA, OPEN_RATE, { 1.5f }); // Mill Lift, 3x
-	_memory->WritePanelData<float>(0x17CC1, OPEN_RATE, { 0.8f }); // Mill Elevator, 4x
-	_memory->WritePanelData<float>(0x0061A, OPEN_RATE, { 0.1f }); // Swamp Sliding Bridge, 4x
-	_memory->WritePanelData<float>(0x09EEC, OPEN_RATE, { 0.1f }); // Mountain 2 Elevator, 4x
+	_memory->WritePanelData<float>(0x09F95, OPEN_RATE, { 0.5f });  // Desert Surface Final Control, 4x
+	_memory->WritePanelData<float>(0x03839, OPEN_RATE, { 7 }); // Mill Ramp, 3x
+	_memory->WritePanelData<float>(0x021BA, OPEN_RATE, { 5 }); // Mill Lift, 3x
+	_memory->WritePanelData<float>(0x17CC1, OPEN_RATE, { 5 }); // Mill Elevator, 4x
+	_memory->WritePanelData<float>(0x0061A, OPEN_RATE, { 1 }); // Swamp Sliding Bridge, 4x
+	_memory->WritePanelData<float>(0x09EEC, OPEN_RATE, { 30 }); // Mountain 2 Elevator, 4x
 	_memory->WritePanelData<float>(0x17E74, OPEN_RATE, { 0.03f }); // Swamp Flood gate (inner), 2x //Keeping these slower for now to help with EP's
 	_memory->WritePanelData<float>(0x1802C, OPEN_RATE, { 0.03f }); // Swamp Flood gate (outer), 2x
-	_memory->WritePanelData<float>(0x005A2, OPEN_RATE, { 0.04f }); // Swamp Rotating Bridge, 4x
-	_memory->WritePanelData<float>(0x17C6A, OPEN_RATE, { 0.25f }); // Ramp Angle, 5x
-	_memory->WritePanelData<float>(0x17F02, OPEN_RATE, { 0.15f }); // Ramp Position, 4x
+	_memory->WritePanelData<float>(0x005A2, OPEN_RATE, { 0.1f }); // Swamp Rotating Bridge, 4x
+	_memory->WritePanelData<float>(0x17C6A, OPEN_RATE, { 1 }); // Ramp Angle, 5x
+	_memory->WritePanelData<float>(0x17F02, OPEN_RATE, { 1 }); // Ramp Position, 4x
 	_memory->WritePanelData<float>(0x17C50, OPEN_RATE, { 0.3f }); //Boathouse Barrier, 2x
 }
 

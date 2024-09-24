@@ -135,9 +135,30 @@ private:
 	bool place_triangles(int color, int amount, int targetCount);
 	int count_sides(Point pos);
 	bool place_arrows(int color, int amount, int targetCount);
+	bool place_mines(int color, int amount, int target_num);
 	int count_crossings(Point pos, Point dir);
 	bool place_erasers(const std::vector<int>& colors, const std::vector<int>& eraseSymbols);
 	bool combine_shapes(std::vector<Shape>& shapes);
+
+	bool place_heads(int color, int amount);
+	bool place_mushrooms(int color, int amount);
+	bool place_ghosts(int color, int amount);
+	bool place_bars(int color, int amount,int shape);
+	void DebugLog(int i);
+	std::set<Point> get_region_points(Point pos);
+	std::vector<int> get_region_grid_patterns(std::set<Point> points);
+	bool place_antitriangles(int color, int amount, int target_num);
+	bool check_it_is_corner(Point pos);
+	bool place_darts(int color, int amount, int target_num);
+	bool place_rains(int color, int amount);
+	bool isSurrounded(Point pos, Point dir, int type);
+	bool place_pointers(int color, int amount);
+	bool place_newsymbolsA(int color, int amount);
+	bool place_newsymbolsB(int color, int amount);
+	bool place_newsymbolsC(int color, int amount);
+	bool place_newsymbolsD(int color, int amount);
+	bool place_newsymbolsE(int color, int amount);
+	bool place_newsymbolsF(int color, int amount);
 
 	std::shared_ptr<Panel> _panel;
 	std::vector<std::vector<int>> _custom_grid;

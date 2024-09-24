@@ -68,6 +68,29 @@ public:
 	virtual void action();
 	void initPath();
 	bool checkArrow(int x, int y);
+	bool checkMine(int x, int y, int symbol);
+	bool checkHead(int x, int y, int symbol);
+	void DebugLog(int i);
+	bool checkMushroom(int x, int y, int symbol);
+	bool checkGhost(int x, int y, int symbol);
+	bool checkBar(int x, int y, int symbol);
+	std::set<Point> get_region_points_fw(Point pos);
+	std::vector<int> get_region_grid_patterns_fw(std::set<Point> points);
+	bool checkAntitriangle(int x, int y, int symbol);
+	int get(Point p);
+	bool check_it_is_corner(Point pos);
+	bool checkDart(int x, int y, int symbol);
+	bool checkRain(int x, int y, int symbol);
+	bool isSurrounded(Point pos, Point dir, int type);
+	bool checkPointer(int x, int y, int symbol);
+	bool checkNewSymbolsA(int x, int y, int symbol);
+	bool checkNewSymbolsB(int x, int y, int symbol);
+	bool checkNewSymbolsC(int x, int y, int symbol);
+	bool checkNewSymbolsD(int x, int y, int symbol);
+	bool checkNewSymbolsE(int x, int y, int symbol);
+	bool checkNewSymbolsF(int x, int y, int symbol);
+	std::set<Point> get_region_for_watchdog(Point pos);
+	std::set<int> get_symbols_in_region_for_watchdog(const std::set<Point>& region);
 	bool checkArrowPillar(int x, int y);
 
 	int id;
@@ -79,6 +102,8 @@ public:
 	int style;
 	int exitPos, exitPosSym, exitPoint;
 	std::vector<Point> DIRECTIONS;
+	template<class T>
+	T pick_random_fw(const std::set<T>& set);
 };
 
 class BridgeWatchdog : public Watchdog {

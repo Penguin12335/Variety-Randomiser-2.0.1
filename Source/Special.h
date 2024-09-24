@@ -23,7 +23,8 @@ public:
 	Special(std::shared_ptr<Generate> generator) {
 		this->generator = generator;
 	}
-	
+
+	void generateSymmetryDespair(int id, Panel::Symmetry sym);
 	void generateSpecialSymMaze(std::shared_ptr<Generate> gen, int id);
 	void generateReflectionDotPuzzle(std::shared_ptr<Generate> gen, int id1, int id2, std::vector<std::pair<int, int>> symbols, Panel::Symmetry symmetry, bool split);
 	void generateAntiPuzzle(int id);

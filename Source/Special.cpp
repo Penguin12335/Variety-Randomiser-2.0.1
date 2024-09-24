@@ -7,6 +7,28 @@
 #include "Quaternion.h"
 #include "../App/Version.h"
 
+void Special::generateSymmetryDespair(int id, Panel::Symmetry sym) {
+	generator->setFlagOnce(Generate::Config::WriteInvisible);
+	WritePanelData(id, PATTERN_POINT_COLOR, { 0.5f, 1, 0.5f, 1 });
+	WritePanelData(id, PATTERN_POINT_COLOR_A, { 0, 1, 1, 1 });
+	WritePanelData(id, PATTERN_POINT_COLOR_B, { 1, 1, 0, 1 });
+	WritePanelData(id, ACTIVE_COLOR, { 0, 1, 1, 1 });
+	WritePanelData(id, REFLECTION_PATH_COLOR, { 1, 1, 0, 1 });
+	generator->setGridSize(9, 9);
+	generator->setSymmetry(sym);
+	generator->setSymbol(Decoration::Exit, 0, 16); generator->setSymbol(Decoration::Exit, 18, 2);
+	generator->setSymbol(Decoration::Start, 0, 0); generator->setSymbol(Decoration::Start, 18, 18);
+	generator->setSymbol(Decoration::Exit, 2, 0); generator->setSymbol(Decoration::Exit, 16, 18);
+	generator->setSymbol(Decoration::Start, 18, 0); generator->setSymbol(Decoration::Start, 0, 18);
+	if (sym == Panel::Symmetry::Rotational) {
+		generator->generate(id, Decoration::Dot, 12, Decoration::Dot | Decoration::Color::Cyan, 6, Decoration::Dot | Decoration::Color::Yellow, 6,Decoration::Gap, 18);
+	}
+	else {
+		generator->generate(id, Decoration::Dot_Intersection, 12, Decoration::Dot_Intersection | Decoration::Color::Cyan, 6, Decoration::Dot_Intersection | Decoration::Color::Yellow, 6, Decoration::Triangle, 10);
+	}
+	generator->resetConfig();
+}
+
 void Special::generateSpecialSymMaze(std::shared_ptr<Generate> gen, int id) {
 	do {
 		gen->setFlagOnce(Generate::Config::DisableWrite);
@@ -121,6 +143,7 @@ void Special::generateAntiPuzzle(int id)
 	}
 }
 
+
 void Special::generateColorFilterPuzzle(int id, Point size, const std::vector<std::pair<int, int>>& symbols, const Color& filter)
 {
 	generator->setFlagOnce(Generate::Config::DisableWrite);
@@ -149,7 +172,7 @@ void Special::generateColorFilterPuzzle(int id, Point size, const std::vector<st
 		std::swap(availableColors[i], availableColors[Random::rand() % availableColors.size()]);
 	}
 	std::vector<Color> symbolColors;
-	for (int y = generator->_panel->_height - 2; y>0; y -= 2) {
+	for (int y = generator->_panel->_height - 2; y > 0; y -= 2) {
 		for (int x = 1; x < generator->_panel->_width - 1; x += 2) {
 			if (generator->get(x, y) == 0) symbolColors.push_back({ 0, 0, 0, 0 });
 			else symbolColors.push_back(availableColors[(generator->get(x, y) & 0xf) - 1]);
@@ -158,7 +181,7 @@ void Special::generateColorFilterPuzzle(int id, Point size, const std::vector<st
 	bool pass = false;
 	while (!pass) {
 		//Add random variation in remaining color channel(s)
-		for (Color &c : symbolColors) {
+		for (Color& c : symbolColors) {
 			if (c.a == 0) continue;
 			if (filter.r == 0) c.r = static_cast<float>(Random::rand() % 2);
 			if (filter.g == 0) c.g = static_cast<float>(Random::rand() % 2);
@@ -166,7 +189,7 @@ void Special::generateColorFilterPuzzle(int id, Point size, const std::vector<st
 		}
 		//Check for solvability
 		std::map<Color, int> colorCounts;
-		for (Color &c : symbolColors) {
+		for (Color& c : symbolColors) {
 			colorCounts[c]++;
 		}
 		for (const auto& pair : colorCounts) {
@@ -189,7 +212,6 @@ void Special::generateSoundDotPuzzle(int id1, int id2, std::vector<int> dotSeque
 	WritePanelData(id2, PATTERN_POINT_COLOR, ReadPanelData<Color>(id2, SUCCESS_COLOR_A));
 	generator->resetConfig();
 }
-
 void Special::generateSoundDotPuzzle(int id, Point size, std::vector<int> dotSequence, bool writeSequence) {
 	generator->resetConfig();
 	generator->setFlagOnce(Generate::Config::DisableWrite);
@@ -478,10 +500,16 @@ void Special::generateRGBStarPuzzleN(int id)
 }
 
 void Special::generateRGBStonePuzzleH(int id) {
+	generator->setGridSize(7, 7);
+	generator->setSymmetry(Panel::Symmetry::RotateRight);
+	generator->setSymbol(Decoration::Exit, 0, 10); generator->setSymbol(Decoration::Exit, 10, 14);
+	generator->setSymbol(Decoration::Exit, 14, 4); generator->setSymbol(Decoration::Exit, 4, 0);
+	generator->setSymbol(Decoration::Start, 4, 10); generator->setSymbol(Decoration::Start, 10, 10);
+	generator->setSymbol(Decoration::Start, 10, 4); generator->setSymbol(Decoration::Start, 4, 4);
 	while (true) {
 		generator->setFlagOnce(Generate::Config::DisableWrite);
 		generator->generate(id);
-		int amount = 10;
+		int amount = 20;
 		std::set<Decoration::Color> used;
 		std::vector<Decoration::Color> colors = { Decoration::Black, Decoration::Red, Decoration::Green, Decoration::Blue, Decoration::Magenta, Decoration::Yellow };
 		while (amount > 0) {
@@ -522,11 +550,13 @@ void Special::generateRGBDotPuzzleH(int id) {
 	WritePanelData(id, ACTIVE_COLOR, { 0, 1, 1, 1 });
 	WritePanelData(id, REFLECTION_PATH_COLOR, { 1, 1, 0, 1 });
 	generator->setGridSize(7, 7);
-	generator->setSymmetry(Panel::Symmetry::Rotational);
-	generator->setSymbol(Decoration::Exit, 0, 14); generator->setSymbol(Decoration::Exit, 14, 0);
-	generator->setSymbol(Decoration::Exit, 0, 0); generator->setSymbol(Decoration::Exit, 14, 14);
-	generator->generate(id, Decoration::Dot_Intersection | Decoration::Color::Cyan, 2, Decoration::Dot_Intersection | Decoration::Color::Yellow, 4, Decoration::Dot_Intersection, 6,
-		Decoration::Triangle | Decoration::Color::Orange, 4, Decoration::Start, 4);
+	generator->setSymmetry(Panel::Symmetry::RotateRight);
+	generator->setSymbol(Decoration::Exit, 0, 10); generator->setSymbol(Decoration::Exit, 10, 14);
+	generator->setSymbol(Decoration::Exit, 14, 4); generator->setSymbol(Decoration::Exit, 4, 0);
+	generator->setSymbol(Decoration::Start, 4, 10); generator->setSymbol(Decoration::Start, 10, 10);
+	generator->setSymbol(Decoration::Start, 10, 4); generator->setSymbol(Decoration::Start, 4, 4);
+	generator->generate(id, Decoration::Dot_Intersection | Decoration::Color::Cyan, 4, Decoration::Dot_Intersection | Decoration::Color::Yellow, 4, Decoration::Dot_Intersection, 7,
+		Decoration::Triangle | Decoration::Color::Orange, 12);
 	generator->resetConfig();
 }
 
@@ -728,7 +758,7 @@ void Special::generateMultiPuzzle(std::vector<int> ids, const std::vector<std::v
 	for (int i = 0; i < ids.size(); i++) {
 		gens[i].setFlag(Generate::Config::DisableWrite);
 		gens[i].setFlag(Generate::WriteColors);
-		if (symbols[i].getNum(Decoration::Poly)  - symbols[i].getNum(Decoration::Eraser) > 1) gens[i].setFlag(Generate::RequireCombineShapes);
+		if (symbols[i].getNum(Decoration::Poly) - symbols[i].getNum(Decoration::Eraser) > 1) gens[i].setFlag(Generate::RequireCombineShapes);
 	}
 	while (!generateMultiPuzzle(ids, gens, symbols, generator->_path)) {
 		generator->generate(ids[0]);
@@ -1159,7 +1189,7 @@ void Special::generateMountainFloorH()
 		gen.setFlag(Generate::Config::DisableCancelShapes);
 		PuzzleSymbols symbols({ { Decoration::Poly, 2 },{ Decoration::Eraser | Decoration::Color::Green, 1 } });
 		if (newShape.size() > 5) {
-			if (combine == 0) symbols = PuzzleSymbols({ { Decoration::Poly, 3 },{ Decoration::Eraser | Decoration::Color::Green, 1 } });
+			if (combine == 0) symbols = PuzzleSymbols({ {Decoration::Poly, 3 },{ Decoration::Eraser | Decoration::Color::Green, 1 } });
 			if (combine == 1) symbols = PuzzleSymbols({ { Decoration::Poly, 3 },{ Decoration::Poly | Decoration::Negative | Decoration::Color::Cyan, 1 } });
 			combine++;
 		}
@@ -1294,14 +1324,14 @@ void Special::addDecoyExits(std::shared_ptr<Generate> gen, int amount) {
 }
 
 void Special::initSSGrid(std::shared_ptr<Generate> gen) {
-	gen->setSymbol(Decoration::Start, 0, 0);  gen->setSymbol(Decoration::Start, 6, 0), gen->setSymbol(Decoration::Start, 8, 0), gen->setSymbol(Decoration::Start, 14, 0);
-	gen->setSymbol(Decoration::Start, 0, 6);  gen->setSymbol(Decoration::Start, 6, 6), gen->setSymbol(Decoration::Start, 8, 6), gen->setSymbol(Decoration::Start, 14, 6);
-	gen->setSymbol(Decoration::Start, 0, 8);  gen->setSymbol(Decoration::Start, 6, 8), gen->setSymbol(Decoration::Start, 8, 8), gen->setSymbol(Decoration::Start, 14, 8);
-	gen->setSymbol(Decoration::Start, 0, 14);  gen->setSymbol(Decoration::Start, 6, 14), gen->setSymbol(Decoration::Start, 8, 14), gen->setSymbol(Decoration::Start, 14, 14);
-	gen->setSymbol(Decoration::Exit, 2, 0);  gen->setSymbol(Decoration::Exit, 4, 0), gen->setSymbol(Decoration::Exit, 10, 0), gen->setSymbol(Decoration::Exit, 12, 0);
-	gen->setSymbol(Decoration::Exit, 2, 14);  gen->setSymbol(Decoration::Exit, 4, 14), gen->setSymbol(Decoration::Exit, 10, 14), gen->setSymbol(Decoration::Exit, 12, 14);
-	gen->setSymbol(Decoration::Exit, 0, 2);  gen->setSymbol(Decoration::Exit, 0, 4), gen->setSymbol(Decoration::Exit, 0, 10), gen->setSymbol(Decoration::Exit, 0, 12);
-	gen->setSymbol(Decoration::Exit, 14, 2);  gen->setSymbol(Decoration::Exit, 14, 4), gen->setSymbol(Decoration::Exit, 14, 10), gen->setSymbol(Decoration::Exit, 14, 12);
+	gen->setSymbol(Decoration::Start, 0, 0);  gen->setSymbol(Decoration::Start, 8, 0), gen->setSymbol(Decoration::Start, 10, 0), gen->setSymbol(Decoration::Start, 18, 0);
+	gen->setSymbol(Decoration::Start, 0, 8);  gen->setSymbol(Decoration::Start, 8, 8), gen->setSymbol(Decoration::Start, 10, 8), gen->setSymbol(Decoration::Start, 18, 8);
+	gen->setSymbol(Decoration::Start, 0, 10);  gen->setSymbol(Decoration::Start, 8, 10), gen->setSymbol(Decoration::Start, 10, 10), gen->setSymbol(Decoration::Start, 18, 10);
+	gen->setSymbol(Decoration::Start, 0, 18);  gen->setSymbol(Decoration::Start, 8, 18), gen->setSymbol(Decoration::Start, 10, 18), gen->setSymbol(Decoration::Start, 18, 18);
+	gen->setSymbol(Decoration::Exit, 2, 0);  gen->setSymbol(Decoration::Exit, 6, 0), gen->setSymbol(Decoration::Exit, 12, 0), gen->setSymbol(Decoration::Exit, 16, 0);
+	gen->setSymbol(Decoration::Exit, 2, 18);  gen->setSymbol(Decoration::Exit, 6, 18), gen->setSymbol(Decoration::Exit, 12, 18), gen->setSymbol(Decoration::Exit, 16, 18);
+	gen->setSymbol(Decoration::Exit, 0, 2);  gen->setSymbol(Decoration::Exit, 0, 6), gen->setSymbol(Decoration::Exit, 0, 12), gen->setSymbol(Decoration::Exit, 0, 16);
+	gen->setSymbol(Decoration::Exit, 18, 2);  gen->setSymbol(Decoration::Exit, 18, 6), gen->setSymbol(Decoration::Exit, 18, 12), gen->setSymbol(Decoration::Exit, 18, 16);
 }
 
 void Special::initRotateGrid(std::shared_ptr<Generate> gen)
@@ -1522,7 +1552,7 @@ void Special::drawSeedAndDifficulty(int id, int seed, bool hard, bool setSeed, b
 	std::vector<int> connectionsA;
 	std::vector<int> connectionsB;
 
-	createText(id, hard ? "expert" : "normal", intersections, connectionsA, connectionsB, 0.1f, 0.9f, 0.25f, 0.4f);
+	createText(id, hard ? "despair" : "normal", intersections, connectionsA, connectionsB, 0.1f, 0.9f, 0.25f, 0.4f);
 	std::string seedStr = std::to_string(seed);
 	createText(id, seedStr, intersections, connectionsA, connectionsB, 0.5f - seedStr.size()*0.06f, 0.5f + seedStr.size()*0.06f, setSeed ? 0.6f : 0.65f, setSeed ? 0.75f : 0.8f);
 	if (setSeed) createText(id, "set seed", intersections, connectionsA, connectionsB, 0.1f, 0.9f, 0.86f, 0.96f);
@@ -1538,9 +1568,42 @@ void Special::drawGoodLuckPanel(int id)
 	std::vector<float> intersections;
 	std::vector<int> connectionsA;
 	std::vector<int> connectionsB;
-	createText(id, "good", intersections, connectionsA, connectionsB, 0.2f, 0.8f, 0.07f, 0.23f);
-	createText(id, "luck!", intersections, connectionsA, connectionsB, 0.2f, 0.8f, 0.77f, 0.93f);
-	drawText(id, intersections, connectionsA, connectionsB, { 0.66f, 0.62f, 0.66f, 0.69f, 0.32f, 0.69f, 0.51f, 0.51f, 0.32f, 0.32f, 0.66f, 0.32f, 0.66f, 0.39f });
+
+	std::vector<float> sa = {
+		0.45f, 0.9f,
+		0.4f, 0.88f,
+		0.35f, 0.85f,
+		0.3f, 0.8f,
+		0.25f, 0.72f,
+		0.2f, 0.6f,
+		0.15f, 0.55f,
+		0.1f, 0.5f,
+		0.2f, 0.51f,
+		0.25f, 0.54f,
+		0.275f, 0.4f,
+		0.3f, 0.3f,
+		0.35f, 0.25f,
+		0.4f, 0.235f,
+		0.45f, 0.22f,
+		0.5f, 0.21f,
+		0.55f, 0.22f,
+		0.6f, 0.235f,
+		0.65f, 0.25f,
+		0.7f, 0.3f,
+		0.725f, 0.4f,
+		0.75f, 0.54f,
+		0.8f, 0.51f,
+		0.9f, 0.5f,
+		0.85f, 0.55f,
+		0.8f, 0.6f,
+		0.75f, 0.72f,
+		0.7f, 0.8f,
+		0.65f, 0.85f,
+		0.6f, 0.88f,
+		0.55f, 0.9f
+	};
+	createText(id, "good luck!", intersections, connectionsA, connectionsB, 0.1f, 0.9f, 0.85f, 0.98f);
+	drawText(id, intersections, connectionsA, connectionsB, sa);
 }
 
 //For testing/debugging purposes only

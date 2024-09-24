@@ -181,7 +181,6 @@ void Panel::Resize(int width, int height)
 		miny = 0.5f - unitSize * (height - 1) / 2;
 		maxy = 0.5f + unitSize * (height - 1) / 2;
 	}
-	if (Point::pillarWidth) Point::pillarWidth = width;
 	_width = width;
 	_height = height;
 	_grid.resize(width);
@@ -291,6 +290,13 @@ void Panel::WriteDecorations() {
 			if ((_grid[x][y] & 0x700) == Decoration::Shape::Arrow) {
 				_style |= HAS_TRIANGLES | HAS_STONES;
 				arrows = true;
+			}
+
+			for (int symbol : {Decoration::Shape::Mine, Decoration::Shape::Head, Decoration::Shape::Mushroom, Decoration::Shape::Ghost, Decoration::Shape::Bar, Decoration::Shape::Antitriangle, Decoration::Shape::Dart, Decoration::Shape::Rain, Decoration::Shape::Pointer, Decoration::Shape::NewSymbolsA, Decoration::Shape::NewSymbolsB, Decoration::Shape::NewSymbolsC, Decoration::Shape::NewSymbolsD, Decoration::Shape::NewSymbolsE, Decoration::Shape::NewSymbolsF}) {
+				if ((_grid[x][y] & 0xF000700) == symbol) {
+					_style |= HAS_TRIANGLES | HAS_STONES;
+					arrows = true;
+				}
 			}
 		}
 	}
@@ -617,11 +623,98 @@ void Panel::WriteIntersections() {
 		}
 	}
 
+	for (int y = 1; y < _height; y += 2) {
+		for (int x = 1; x < _width; x += 2) {
+			std::string s = std::to_string(_grid[x][y]);
+			const char* mbs = s.data();
+			size_t ret;
+			mbstowcs_s(&ret, nullptr, 0, mbs, s.length());
+			std::wstring ws(ret, 0);
+			mbstowcs_s(&ret, &ws[0], ret, mbs, s.length());
+			ws.resize(ret - 1);
+			OutputDebugStringW(ws.data());
+			OutputDebugStringW(L",");
+		}
+	}
+
+
 	//Arrows (if applicable)
 	for (int y = 1; y < _height; y += 2) {
 		for (int x = 1; x < _width; x += 2) {
 			if ((_grid[x][y] & 0x700) == Decoration::Arrow)
 				render_arrow(x, y, (_grid[x][y] & 0xf000) >> 12, (_grid[x][y] & 0xf0000) >> 16, intersections, intersectionFlags, polygons);
+		}
+	}
+
+	//NewSymbols (if applicable)
+	for (int y = 1; y < _height; y += 2) {
+		for (int x = 1; x < _width; x += 2) {
+			if ((_grid[x][y] & 0xF000700) == Decoration::Mine)
+				render_mine(x, y, (_grid[x][y] & 0xf0000) >> 16 , intersections, intersectionFlags, polygons);
+		}
+	}
+
+	//NewSymbols2 (if applicable)
+	for (int y = 1; y < _height; y += 2) {
+		for (int x = 1; x < _width; x += 2) {
+			if ((_grid[x][y] & 0xF000700) == Decoration::Head)
+				render_head(x, y, (_grid[x][y] & 0xf0000) >> 16, intersections, intersectionFlags, polygons);
+		}
+	}
+
+	//NewSymbols3 (if applicable)
+	for (int y = 1; y < _height; y += 2) {
+		for (int x = 1; x < _width; x += 2) {
+			if ((_grid[x][y] & 0xF000700) == Decoration::Mushroom)
+				render_mushroom(x, y, (_grid[x][y] & 0xf0000) >> 16, intersections, intersectionFlags, polygons);
+		}
+	}
+
+	//NewSymbols4 (if applicable)
+	for (int y = 1; y < _height; y += 2) {
+		for (int x = 1; x < _width; x += 2) {
+			if ((_grid[x][y] & 0xF000700) == Decoration::Ghost)
+				render_ghost(x, y, (_grid[x][y] & 0xff0000) >> 16, intersections, intersectionFlags, polygons);
+		}
+	}
+
+	//NewSymbols5 (if applicable)
+	for (int y = 1; y < _height; y += 2) {
+		for (int x = 1; x < _width; x += 2) {
+			if ((_grid[x][y] & 0xF000700) == Decoration::Bar)
+				render_bar(x, y, (_grid[x][y] & 0xf0000) >> 16, intersections, intersectionFlags, polygons);
+		}
+	}
+
+	//NewSymbols6 (if applicable)
+	for (int y = 1; y < _height; y += 2) {
+		for (int x = 1; x < _width; x += 2) {
+			if ((_grid[x][y] & 0xF000700) == Decoration::Antitriangle)
+				render_antitriangle(x, y, (_grid[x][y] & 0xf0000) >> 16, intersections, intersectionFlags, polygons);
+		}
+	}
+
+	//NewSymbols7 (if applicable)
+	for (int y = 1; y < _height; y += 2) {
+		for (int x = 1; x < _width; x += 2) {
+			if ((_grid[x][y] & 0xF000700) == Decoration::Dart)
+				render_dart(x, y, (_grid[x][y] & 0xf0000) >> 16, (_grid[x][y] & 0x0f000) >> 12, intersections, intersectionFlags, polygons);
+		}
+	}
+
+	//NewSymbols8 (if applicable)
+	for (int y = 1; y < _height; y += 2) {
+		for (int x = 1; x < _width; x += 2) {
+			if ((_grid[x][y] & 0xF000700) == Decoration::Rain)
+				render_rain(x, y, (_grid[x][y] & 0xf0000) >> 16, intersections, intersectionFlags, polygons);
+		}
+	}
+
+	//NewSymbols9 (if applicable)
+	for (int y = 1; y < _height; y += 2) {
+		for (int x = 1; x < _width; x += 2) {
+			if ((_grid[x][y] & 0xF000700) == Decoration::Pointer)
+				render_pointer(x, y, (_grid[x][y] & 0xf0000) >> 16, intersections, intersectionFlags, polygons);
 		}
 	}
 

@@ -1765,10 +1765,10 @@ void PuzzleList::GenerateTownH()
 	generator->setFlagOnce(Generate::Config::DecorationsOnly);
 	generator->write(0x334D8);
 	generator->arrowColor = { 0, 0, 1, 1 };
-	generator->setGridSize(6, 6);
-	generator->generate(0x03C0C, Decoration::Antitriangle, 4, Decoration::Star | Decoration::Red, 4, Decoration::Stone | Decoration::Green, 6);
+	generator->setGridSize(5, 5);
+	generator->generate(0x03C0C, Decoration::Antitriangle, 4, Decoration::Star | Decoration::Red, 4, Decoration::Stone | Decoration::Green, 3);
 	generator->arrowColor = { 1, 0, 0, 1 };
-	generator->generate(0x03C08, Decoration::Rain, 4, Decoration::Star | Decoration::Green, 4, Decoration::Stone | Decoration::Blue, 6);
+	generator->generate(0x03C08, Decoration::Dart, 4, Decoration::Star | Decoration::Green, 4, Decoration::Stone | Decoration::Blue, 3);
 	//Orange Crate
 	generator->setGridSize(5, 5);
 	generator->arrowColor = { 0, 1, 1, 1 };
