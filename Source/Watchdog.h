@@ -45,9 +45,9 @@ public:
 	virtual void action();
 };
 
-class ArrowWatchdog : public Watchdog {
+class SymbolWatchdog : public Watchdog {
 public:
-	ArrowWatchdog(int id) : Watchdog(0.1f) {
+	SymbolWatchdog(int id) : Watchdog(0.1f) {
 		Panel panel(id);
 		this->id = id;
 		grid = backupGrid = panel._grid;
@@ -61,13 +61,14 @@ public:
 		exitPosSym = (width / 2 + 1) * (height / 2 + 1) - 1 - exitPos;
 		exitPoint = (width / 2 + 1) * (height / 2 + 1);
 	}
-	ArrowWatchdog(int id, int pillarWidth) : ArrowWatchdog(id) {
+	SymbolWatchdog(int id, int pillarWidth) : SymbolWatchdog(id) {
 		this->pillarWidth = pillarWidth;
 		if (pillarWidth > 0) exitPoint = (width / 2) * (height / 2 + 1);
 	}
 	virtual void action();
 	void initPath();
-	bool checkArrow(int x, int y);
+	bool check(int x, int y);
+	bool checkArrow(int x, int y, int symbol);
 	bool checkMine(int x, int y, int symbol);
 	bool checkHead(int x, int y, int symbol);
 	void DebugLog(int i);
@@ -83,9 +84,9 @@ public:
 	bool checkRain(int x, int y, int symbol);
 	bool isSurrounded(Point pos, Point dir, int type);
 	bool checkPointer(int x, int y, int symbol);
-	bool checkNewSymbolsA(int x, int y, int symbol);
-	bool checkNewSymbolsB(int x, int y, int symbol);
-	bool checkNewSymbolsC(int x, int y, int symbol);
+	bool checkDiamonds(int x, int y, int symbol);
+	bool checkDice(int x, int y, int symbol);
+	bool checkBells(int x, int y, int symbol);
 	bool checkNewSymbolsD(int x, int y, int symbol);
 	bool checkNewSymbolsE(int x, int y, int symbol);
 	bool checkNewSymbolsF(int x, int y, int symbol);

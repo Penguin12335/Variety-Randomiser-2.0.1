@@ -613,8 +613,8 @@ bool Generate::place_all_symbols(PuzzleSymbols & symbols)
 	//Added_Start
 	for (std::pair<int, int> s : symbols[Decoration::Mine]) if (!place_mines(s.first & 0xf, s.second, (s.first & 0xf0000) >> 16))
 		return false;
-	for (std::pair<int, int> s : symbols[Decoration::Head]) if (!place_heads(s.first & 0xf, s.second))
-		return false;
+	//for (std::pair<int, int> s : symbols[Decoration::Head]) if (!place_heads(s.first & 0xf, s.second))
+	//	return false;
 	for (std::pair<int, int> s : symbols[Decoration::Mushroom]) if (!place_mushrooms(s.first & 0xf, s.second))
 		return false;
 	for (std::pair<int, int> s : symbols[Decoration::Ghost]) if (!place_ghosts(s.first & 0xf, s.second))
@@ -627,21 +627,21 @@ bool Generate::place_all_symbols(PuzzleSymbols & symbols)
 		return false;
 	for (std::pair<int, int> s : symbols[Decoration::Dart]) if (!place_darts(s.first & 0xf, s.second, (s.first & 0xf0000) >> 16))
 		return false;
-	for (std::pair<int, int> s : symbols[Decoration::Rain]) if (!place_rains(s.first & 0xf, s.second))
+	for (std::pair<int, int> s : symbols[Decoration::Rain]) if (!place_rains(s.first & 0xf, s.second, (s.first & 0xf0000) >> 16))
 		return false;
 	for (std::pair<int, int> s : symbols[Decoration::Pointer]) if (!place_pointers(s.first & 0xf, s.second))
 		return false;
-	for (std::pair<int, int> s : symbols[Decoration::NewSymbolsA]) if (!place_newsymbolsA(s.first & 0xf, s.second))
+	for (std::pair<int, int> s : symbols[Decoration::Dice]) if (!place_dice(s.first & 0xf, s.second))
 		return false;
-	for (std::pair<int, int> s : symbols[Decoration::NewSymbolsB]) if (!place_newsymbolsB(s.first & 0xf, s.second))
-		return false;
-	for (std::pair<int, int> s : symbols[Decoration::NewSymbolsC]) if (!place_newsymbolsC(s.first & 0xf, s.second))
+	for (std::pair<int, int> s : symbols[Decoration::Bell]) if (!place_bells(s.first & 0xf, s.second))
 		return false;
 	for (std::pair<int, int> s : symbols[Decoration::NewSymbolsD]) if (!place_newsymbolsD(s.first & 0xf, s.second))
 		return false;
 	for (std::pair<int, int> s : symbols[Decoration::NewSymbolsE]) if (!place_newsymbolsE(s.first & 0xf, s.second))
 		return false;
 	for (std::pair<int, int> s : symbols[Decoration::NewSymbolsF]) if (!place_newsymbolsF(s.first & 0xf, s.second))
+		return false;
+	for (std::pair<int, int> s : symbols[Decoration::Diamond]) if (!place_diamonds(s.first & 0xf, s.second, (s.first & 0xf0000) >> 16))
 		return false;
 	//Added_End
 	for (std::pair<int, int> s : symbols[Decoration::Star]) if (!place_stars(s.first & 0xf, s.second))
@@ -1584,6 +1584,17 @@ int Generate::count_color(const std::set<Point>& region, int color)
 	return count;
 }
 
+//Get the highest diamond number in the region (for the stars)
+int Generate::get_diamond_max(const std::set<Point>& region) {
+	int num = 0;
+	for (Point p : region) {
+		int sym = get(p);
+		if ((sym & 0xF000700) == Decoration::Diamond && (sym & 0xF0000) >> 16 > num)
+			num = (sym & 0xF0000) >> 16;
+	}
+	return num;
+}
+
 //Place the given amount of stars with the given color
 bool Generate::place_stars(int color, int amount)
 {
@@ -1599,8 +1610,19 @@ bool Generate::place_stars(int color, int amount)
 		}
 		int count = count_color(region, color);
 		if (count >= 2) continue; //Too many of that color
+		int diamond_max = get_diamond_max(region);
+		if (diamond_max + 2 - count > 4) continue; //Would make the diamond count too high
 		if (open2.size() + count < 2) continue; //Not enough space to get 2 of that color
 		if (count == 0 && amount == 1) continue; //If one star is left, it needs a pair
+		if (diamond_max) {
+			for (Point p : region) {
+				int sym = get(p);
+				if ((sym & 0xF000700) == Decoration::Diamond) {
+					sym = (sym & 0xFF0FFFF) | ((((sym & 0xF0000) >> 16) + 2 - count) << 16);
+					set(p, sym);
+				}
+			}
+		}
 		set(pos, Decoration::Star | color);
 		_openpos.erase(pos);
 		amount--;
@@ -2330,7 +2352,7 @@ bool Generate::place_darts(int color, int amount, int target_num)
 	return true;
 }
 
-bool Generate::place_rains(int color, int amount)
+bool Generate::place_rains(int color, int amount, int dir)
 {
 	std::set<Point> open = _openpos;
 	int fails = 0;
@@ -2342,10 +2364,11 @@ bool Generate::place_rains(int color, int amount)
 		if (pos.first == _panel->_width / 2 || Point::pillarWidth > 0 && pos.first == _panel->_width / 2 - 1)
 			continue; //Because of a glitch additional symbols in the center column won't draw right
 		int choice = (_parity != -1 ? Random::rand() % 8 : Random::rand() % 4);
-		Point dir = _8DIRECTIONS1[choice];
+		if (dir) choice = dir - 1;
+		Point direction = _8DIRECTIONS1[choice];
 		bool flag = false;
 
-		if (isSurrounded(pos, dir, 2)) {
+		if (isSurrounded(pos, direction, 2)) {
 			set(pos, Decoration::Rain | color | choice << 16);
 			_openpos.erase(pos);
 			amount--;
@@ -2429,17 +2452,67 @@ bool Generate::place_pointers(int color, int amount)
 	return true;
 }
 
-bool Generate::place_newsymbolsA(int color, int amount)
+bool Generate::place_diamonds(int color, int amount, int num)
+{
+	std::set<Point> open = _openpos;
+	std::set<Point> diamonds;
+	while (amount > 0) {
+		if (open.size() == 0)
+			return false;
+		Point pos = pick_random(open);
+		open.erase(pos);
+		std::set<Point> region = get_region(pos);
+		int count = 1;
+		for (Point p : region) {
+			if (get(p) != 0) count++;
+		}
+		if (count <= 4) {
+			if (num == 0 && count > 2 && Random::rand() % 3 != 0) continue; //Balancing the numbers better
+			if (num > 0) { //Specific count needed, try to add more diamonds to match
+				std::set<Point> open2;
+				for (Point p : region) {
+					if (open.erase(p)) open2.insert(p);
+				}
+				open2.erase(pos);
+				if (count > num || num - count > amount - 1 || num - count > open2.size()) continue;
+				while (count < num) { //Place more diamonds to match the count
+					Point pos2 = pick_random(open2);
+					open2.erase(pos2);
+					set(pos2, Decoration::Diamond);
+					_openpos.erase(pos2);
+					diamonds.insert(pos2);
+					count++;
+					amount--;
+				}
+			}
+			set(pos, Decoration::Diamond);
+			_openpos.erase(pos);
+			diamonds.insert(pos);
+			amount--;
+		}
+		else {
+			for (Point p : region) open.erase(p);
+		}
+	}
+	for (Point pos : diamonds) {
+		int count = 0;
+		for (Point p : get_region(pos)) {
+			if (get(p) != 0) count++;
+		}
+		if (count > 5)
+			return false; //Shouldn't technically run, but just in case
+		set(pos, Decoration::Diamond | color | count << 16);
+		_openpos.erase(pos);
+	}
+	return true;
+}
+
+bool Generate::place_dice(int color, int amount)
 {
 	return true;
 }
 
-bool Generate::place_newsymbolsB(int color, int amount)
-{
-	return true;
-}
-
-bool Generate::place_newsymbolsC(int color, int amount)
+bool Generate::place_bells(int color, int amount)
 {
 	return true;
 }

@@ -35,9 +35,9 @@ void KeepWatchdog::action() {
 	}
 }
 
-//Arrow Watchdog - To run the arrow puzzles
+//Symbol Watchdog - To run the custom symbol puzzles
 
-void ArrowWatchdog::action() {
+void SymbolWatchdog::action() {
 	int length = ReadPanelData<int>(id, TRACED_EDGES);
 	if (length != tracedLength) {
 		complete = false;
@@ -52,7 +52,7 @@ void ArrowWatchdog::action() {
 	if (complete) {
 		for (int x = 1; x < width; x++) {
 			for (int y = 1; y < height; y++) {
-				if (!checkArrow(x, y)) {
+				if (!check(x, y)) {
 					OutputDebugStringW(L"No");
 					WritePanelData<int>(id, STYLE_FLAGS, { style | Panel::Style::HAS_TRIANGLES });
 					return;
@@ -64,7 +64,7 @@ void ArrowWatchdog::action() {
 	}
 }
 
-void ArrowWatchdog::initPath()
+void SymbolWatchdog::initPath()
 {
 	int numTraced = ReadPanelData<int>(id, TRACED_EDGES);
 	int tracedptr = ReadPanelData<int>(id, TRACED_EDGE_DATA);
@@ -119,11 +119,11 @@ void ArrowWatchdog::initPath()
 	}
 }
 
-bool ArrowWatchdog::checkArrow(int x, int y)
+bool SymbolWatchdog::check(int x, int y)
 {
-	if (pillarWidth > 0) return checkArrowPillar(x, y);
 	int symbol = grid[x][y];
-	if ((symbol & 0x700) == Decoration::Triangle && (symbol & 0xf0000) != 0) {
+	int type = symbol & 0xF000700;
+	if (type == Decoration::Triangle && (symbol & 0xf0000) != 0) {
 		int count = 0;
 		if (grid[x - 1][y] == PATH) count++;
 		if (grid[x + 1][y] == PATH) count++;
@@ -131,56 +131,60 @@ bool ArrowWatchdog::checkArrow(int x, int y)
 		if (grid[x][y + 1] == PATH) count++;
 		return count == (symbol >> 16);
 	}
-	if ((symbol & 0xF000700) == Decoration::Mine) {
-		return checkMine(x, y,symbol);
+	if (type == Decoration::Arrow) {
+		return checkArrow(x, y, symbol);
 	}
-	else if ((symbol & 0xF000700) == Decoration::Head) {
-		OutputDebugStringW(L"check_on_2");
+	if (type == Decoration::Mine) {
+		return checkMine(x, y, symbol);
+	}
+	if (type == Decoration::Head) {
 		return checkHead(x, y, symbol);
 	}
-	else if ((symbol & 0xF000700) == Decoration::Mushroom) {
-		OutputDebugStringW(L"check_on_3");
+	if (type == Decoration::Mushroom) {
 		return checkMushroom(x, y, symbol);
 	}
-	else if ((symbol & 0xF000700) == Decoration::Ghost) {
-		OutputDebugStringW(L"check_on_4");
+	if (type == Decoration::Ghost) {
 		return checkGhost(x, y, symbol);
 	}
-	else if ((symbol & 0xF000700) == Decoration::Bar) {
+	if (type == Decoration::Bar) {
 		return checkBar(x, y, symbol);
 	}
-	else if ((symbol & 0xF000700) == Decoration::Antitriangle) {
+	if (type == Decoration::Antitriangle) {
 		return checkAntitriangle(x, y, symbol);
 	}
-	else if ((symbol & 0xF000700) == Decoration::Dart) {
+	if (type == Decoration::Dart) {
 		return checkDart(x, y, symbol);
 	}
-	else if ((symbol & 0xF000700) == Decoration::Rain) {
+	if (type == Decoration::Rain) {
 		return checkRain(x, y, symbol);
 	}
-	else if ((symbol & 0xF000700) == Decoration::Pointer) {
+	if (type == Decoration::Pointer) {
 		return checkPointer(x, y, symbol);
 	}
-	else if ((symbol & 0xF000700) == Decoration::NewSymbolsA) {
-		return checkNewSymbolsA(x, y, symbol);
+	if (type == Decoration::Diamond) {
+		return checkDiamonds(x, y, symbol);
 	}
-	else if ((symbol & 0xF000700) == Decoration::NewSymbolsB) {
-		return checkNewSymbolsB(x, y, symbol);
+	if (type == Decoration::Dice) {
+		return checkDice(x, y, symbol);
 	}
-	else if ((symbol & 0xF000700) == Decoration::NewSymbolsC) {
-		return checkNewSymbolsC(x, y, symbol);
+	if (type == Decoration::Bell) {
+		return checkBells(x, y, symbol);
 	}
-	else if ((symbol & 0xF000700) == Decoration::NewSymbolsD) {
+	if (type == Decoration::NewSymbolsD) {
 		return checkNewSymbolsD(x, y, symbol);
 	}
-	else if ((symbol & 0xF000700) == Decoration::NewSymbolsE) {
+	if (type == Decoration::NewSymbolsE) {
 		return checkNewSymbolsE(x, y, symbol);
 	}
-	else if ((symbol & 0xF000700) == Decoration::NewSymbolsF) {
+	if (type == Decoration::NewSymbolsF) {
 		return checkNewSymbolsF(x, y, symbol);
 	}
-	if ((symbol & 0x700) != Decoration::Arrow)
-		return true;
+	return true;
+}
+
+bool SymbolWatchdog::checkArrow(int x, int y, int symbol)
+{
+	if (pillarWidth > 0) return checkArrowPillar(x, y);
 	int targetCount = (symbol & 0xf000) >> 12;
 	Point dir = DIRECTIONS[(symbol & 0xf0000) >> 16];
 	x += dir.first / 2; y += dir.second / 2;
@@ -195,7 +199,7 @@ bool ArrowWatchdog::checkArrow(int x, int y)
 	return count == targetCount;
 }
 
-bool ArrowWatchdog::checkMine(int x, int y,int symbol) {
+bool SymbolWatchdog::checkMine(int x, int y,int symbol) {
 	Point pos = Point(x, y);
 	std::set<Point> region = get_region_for_watchdog(Point(x, y));
 	std::set<Point> nearby = {
@@ -229,7 +233,7 @@ bool ArrowWatchdog::checkMine(int x, int y,int symbol) {
 	return num == (0xf0000 & symbol) >> 16;
 }
 
-bool ArrowWatchdog::checkHead(int x, int y, int symbol) {
+bool SymbolWatchdog::checkHead(int x, int y, int symbol) {
 	if ((symbol & 0xf0000) >> 16 == 9) return true;
 	std::vector<Point> _8dir = { Point(0, 2), Point(0, -2), Point(2, 0), Point(-2, 0), Point(2, 2), Point(2, -2), Point(-2, -2), Point(-2, 2) };
 	Point dir = _8dir[(symbol & 0xf0000) >> 16];
@@ -241,7 +245,7 @@ bool ArrowWatchdog::checkHead(int x, int y, int symbol) {
 	return true;
 }
 
-void ArrowWatchdog::DebugLog(int i) {
+void SymbolWatchdog::DebugLog(int i) {
 	std::string s = std::to_string(i);
 	const char* mbs = s.data();
 	size_t ret;
@@ -252,7 +256,7 @@ void ArrowWatchdog::DebugLog(int i) {
 	OutputDebugStringW(ws.data());
 }
 
-bool ArrowWatchdog::checkMushroom(int x, int y, int symbol) {
+bool SymbolWatchdog::checkMushroom(int x, int y, int symbol) {
 	std::vector<Point> DIRECTIONS = { Point(0, 2), Point(0, -2), Point(2, 0), Point(-2, 0) };
 	for (Point dir : DIRECTIONS) {
 		int local_x = x + dir.first / 2;
@@ -268,7 +272,7 @@ bool ArrowWatchdog::checkMushroom(int x, int y, int symbol) {
 	return true;
 }
 
-bool ArrowWatchdog::checkGhost(int x, int y, int symbol) {
+bool SymbolWatchdog::checkGhost(int x, int y, int symbol) {
 	int num = 0;
 	std::set<Point> open;
 	for (int x = 1; x < width; x += 2) {
@@ -310,9 +314,9 @@ bool ArrowWatchdog::checkGhost(int x, int y, int symbol) {
 	return true;
 }
 
-template <class T> T ArrowWatchdog::pick_random_fw(const std::set<T>& set) { auto it = set.begin(); std::advance(it, Random::rand() % set.size()); return *it; }
+template <class T> T SymbolWatchdog::pick_random_fw(const std::set<T>& set) { auto it = set.begin(); std::advance(it, Random::rand() % set.size()); return *it; }
 
-bool ArrowWatchdog::checkBar(int x, int y, int symbol) {
+bool SymbolWatchdog::checkBar(int x, int y, int symbol) {
 	int num = (symbol & 0xF0000) >> 16;
 	Point pos = Point(x,y);
 	//0:X(null) 1:„¯(OOCC) 2:„¬(COOC) 3:„­(CCOO) 4:„®(OCCO) 5:„±(COOO) 6:„²(OCOO) 7:„³(OOCO) 8:„°(OOOC) 9:„´(OOOO) A:„«(OCOC) B:„ª(COCO) C:Gap_Column D:Gap_Row
@@ -343,7 +347,7 @@ bool ArrowWatchdog::checkBar(int x, int y, int symbol) {
 	return region_data[num] == 0;
 }
 
-std::set<Point> ArrowWatchdog::get_region_points_fw(Point pos) {
+std::set<Point> SymbolWatchdog::get_region_points_fw(Point pos) {
 	std::set<Point> result;
 	for (Point a : get_region_for_watchdog(pos)) {
 		for (Point dir : { Point(0, 1), Point(0, -1), Point(1, 0), Point(-1, 0), Point(1, 1), Point(1, -1), Point(-1, -1), Point(-1, 1) }) {
@@ -354,7 +358,7 @@ std::set<Point> ArrowWatchdog::get_region_points_fw(Point pos) {
 }
 
 //0:X(null) 1:„¯(OOCC) 2:„¬(COOC) 3:„­(CCOO) 4:„®(OCCO) 5:„±(COOO) 6:„²(OCOO) 7:„³(OOCO) 8:„°(OOOC) 9:„´(OOOO) A:„«(OCOC) B:„ª(COCO) C:Gap_Column D:Gap_Row
-std::vector<int> ArrowWatchdog::get_region_grid_patterns_fw(std::set<Point> points) {
+std::vector<int> SymbolWatchdog::get_region_grid_patterns_fw(std::set<Point> points) {
 	std::vector<int> result(14, 0);
 	for (Point p : points) {
 		if (p.first % 2 == 1 && p.second % 2 == 0 && grid[p.first][p.second] != PATH) {
@@ -422,7 +426,7 @@ std::vector<int> ArrowWatchdog::get_region_grid_patterns_fw(std::set<Point> poin
 	return result;
 }
 
-bool ArrowWatchdog::checkAntitriangle(int x, int y, int symbol) {
+bool SymbolWatchdog::checkAntitriangle(int x, int y, int symbol) {
 	int num = 0;
 	for (Point c : {Point(1, 1), Point(1, -1), Point(-1, -1), Point(-1, 1)}) {
 		if (check_it_is_corner(Point(x + c.first,y + c.second))) {
@@ -433,9 +437,9 @@ bool ArrowWatchdog::checkAntitriangle(int x, int y, int symbol) {
 	return num == (symbol & 0xf0000) >> 16;
 }
 
-int ArrowWatchdog::get(Point p) { return grid[p.first][p.second]; }
+int SymbolWatchdog::get(Point p) { return grid[p.first][p.second]; }
 
-bool ArrowWatchdog::check_it_is_corner(Point pos) {
+bool SymbolWatchdog::check_it_is_corner(Point pos) {
 	std::vector<bool> _4dir = { false,false,false,false };
 	int i = 0;
 	for (Point c : {Point(0, -1), Point(1, 0), Point(0, 1), Point(-1, 0)}) {
@@ -471,7 +475,7 @@ bool ArrowWatchdog::check_it_is_corner(Point pos) {
 }
 
 //
-bool ArrowWatchdog::checkDart(int x, int y, int symbol) {
+bool SymbolWatchdog::checkDart(int x, int y, int symbol) {
 	int targetCount = (symbol & 0xf0000) >> 16;//the number
 	Point dir = DIRECTIONS[(symbol & 0xf000) >> 12];//the direction
 	int count = 0;
@@ -490,12 +494,12 @@ bool ArrowWatchdog::checkDart(int x, int y, int symbol) {
 	return count == targetCount;
 }
 
-bool ArrowWatchdog::checkRain(int x, int y, int symbol) {
+bool SymbolWatchdog::checkRain(int x, int y, int symbol) {
 	std::vector<Point> _8DIRECTIONS1 = { Point(0, 1), Point(0, -1), Point(1, 0), Point(-1, 0), Point(1, 1), Point(1, -1), Point(-1, -1), Point(-1, 1) };
 	return isSurrounded(Point (x,y), _8DIRECTIONS1[(symbol & 0xf0000) >> 16], 2);
 }
 
-bool ArrowWatchdog::isSurrounded(Point pos, Point dir, int type) {
+bool SymbolWatchdog::isSurrounded(Point pos, Point dir, int type) {
 		std::vector<Point> spread;
 		if (dir.first == 0) {
 			spread = { {-1, 0} , {1, 0} };
@@ -523,7 +527,7 @@ bool ArrowWatchdog::isSurrounded(Point pos, Point dir, int type) {
 		return true;
 	}
 
-bool ArrowWatchdog::checkPointer(int x, int y, int symbol) {
+bool SymbolWatchdog::checkPointer(int x, int y, int symbol) {
 	int a = 0;
 	std::vector<int> distance = { INT_MAX, INT_MAX , INT_MAX , INT_MAX };
 	for (Point dir : {Point(2, 0), Point(-2, 0), Point(0, 2), Point(0, -2) }) {//DASW
@@ -560,35 +564,45 @@ bool ArrowWatchdog::checkPointer(int x, int y, int symbol) {
 	return num == ((symbol & 0xf0000) >> 16);
 }
 
-bool ArrowWatchdog::checkNewSymbolsA(int x, int y, int symbol) {
+bool SymbolWatchdog::checkDiamonds(int x, int y, int symbol) {
+	int count = 0;
+	std::set<Point> region = get_region_for_watchdog({ x, y });
+	for (Point p : region) {
+		if (get(p) != 0 && get(p) != Decoration::Triangle) {
+			count++;
+		}
+	}
+	return count == (symbol & 0xF0000) >> 16;
+}
+
+bool SymbolWatchdog::checkDice(int x, int y, int symbol) {
+	int targetCount = 0;
+	std::set<Point> region = get_region_for_watchdog({ x, y });
+	for (Point p : region) {
+		if ((get(p) & 0xF000000) == Decoration::Dice) {
+			targetCount += (get(p) & 0xF0000);
+		}
+	}
+	return region.size() == targetCount;
+}
+
+bool SymbolWatchdog::checkBells(int x, int y, int symbol) {
 	return true;
 }
 
-bool ArrowWatchdog::checkNewSymbolsB(int x, int y, int symbol) {
+bool SymbolWatchdog::checkNewSymbolsD(int x, int y, int symbol) {
 	return true;
 }
 
-bool ArrowWatchdog::checkNewSymbolsC(int x, int y, int symbol) {
+bool SymbolWatchdog::checkNewSymbolsE(int x, int y, int symbol) {
 	return true;
 }
 
-bool ArrowWatchdog::checkNewSymbolsD(int x, int y, int symbol) {
+bool SymbolWatchdog::checkNewSymbolsF(int x, int y, int symbol) {
 	return true;
 }
 
-bool ArrowWatchdog::checkNewSymbolsE(int x, int y, int symbol) {
-	return true;
-}
-
-bool ArrowWatchdog::checkNewSymbolsF(int x, int y, int symbol) {
-	return true;
-}
-
-
-
-
-
-std::set<Point> ArrowWatchdog::get_region_for_watchdog(Point pos) {
+std::set<Point> SymbolWatchdog::get_region_for_watchdog(Point pos) {
 	std::set<Point> region;
 	std::vector<Point> check;
 	check.push_back(pos);
@@ -610,7 +624,7 @@ std::set<Point> ArrowWatchdog::get_region_for_watchdog(Point pos) {
 	return region;
 }
 
-std::set<int> ArrowWatchdog::get_symbols_in_region_for_watchdog(const std::set<Point>& region) {
+std::set<int> SymbolWatchdog::get_symbols_in_region_for_watchdog(const std::set<Point>& region) {
 	std::set<int> symbols;
 	for (Point p : region) {
 		if (grid[p.first][p.second]) symbols.insert(grid[p.first][p.second]);
@@ -618,7 +632,7 @@ std::set<int> ArrowWatchdog::get_symbols_in_region_for_watchdog(const std::set<P
 	return symbols;
 }
 
-bool ArrowWatchdog::checkArrowPillar(int x, int y)
+bool SymbolWatchdog::checkArrowPillar(int x, int y)
 {
 	int symbol = grid[x][y];
 	if ((symbol & 0x700) == Decoration::Triangle && (symbol & 0xf0000) != 0) {

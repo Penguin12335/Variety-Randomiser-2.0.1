@@ -25,7 +25,7 @@ void PuzzleList::GenerateAllN()
 	GenerateMountainN();
 	GenerateCavesN();
 	SetWindowText(_handle, L"Done!");
-	(new ArrowWatchdog(0x0056E))->start(); //Easy way to close the randomizer when the game is done
+	(new SymbolWatchdog(0x0056E))->start(); //Easy way to close the randomizer when the game is done
 	//GenerateShadowsN(); //Can't randomize
 	//GenerateMonasteryN(); //Can't randomize
 }
@@ -1521,7 +1521,7 @@ void PuzzleList::GenerateTreehouseH()
 {
 	generator->setLoadingData(L"Treehouse", 58);
 	generator->resetConfig();
-	generator->arrowColor = { 0, 0.4, 0.6, 1 };
+	generator->arrowColor = { 0, 0.4f, 0.6f, 1 };
 	generator->successColor = { 0, 0.25f, 0.85f, 1 };
 	generator->setFlag(Generate::Config::TreehouseColors);
 	generator->setGridSize(2, 2);

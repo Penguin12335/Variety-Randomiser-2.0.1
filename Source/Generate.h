@@ -129,6 +129,7 @@ private:
 	int make_shape_symbol(const Shape& shape, bool rotated, bool negative) { return make_shape_symbol(shape, rotated, negative, -1, 0); }
 	bool place_shapes(const std::vector<int>& colors, const std::vector<int>& negativeColors, int amount, int numRotated, int numNegative);
 	int count_color(const std::set<Point>& region, int color);
+	int get_diamond_max(const std::set<Point>& region);
 	bool place_stars(int color, int amount);
 	bool has_star(const std::set<Point>& region, int color);
 	bool checkStarZigzag(std::shared_ptr<Panel> panel);
@@ -150,12 +151,12 @@ private:
 	bool place_antitriangles(int color, int amount, int target_num);
 	bool check_it_is_corner(Point pos);
 	bool place_darts(int color, int amount, int target_num);
-	bool place_rains(int color, int amount);
+	bool place_rains(int color, int amount, int dir);
 	bool isSurrounded(Point pos, Point dir, int type);
 	bool place_pointers(int color, int amount);
-	bool place_newsymbolsA(int color, int amount);
-	bool place_newsymbolsB(int color, int amount);
-	bool place_newsymbolsC(int color, int amount);
+	bool place_diamonds(int color, int amount, int num);
+	bool place_dice(int color, int amount);
+	bool place_bells(int color, int amount);
 	bool place_newsymbolsD(int color, int amount);
 	bool place_newsymbolsE(int color, int amount);
 	bool place_newsymbolsF(int color, int amount);
