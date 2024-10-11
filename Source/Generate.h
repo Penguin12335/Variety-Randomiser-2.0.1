@@ -157,8 +157,8 @@ private:
 	bool place_diamonds(int color, int amount, int num);
 	bool place_dice(int color, int amount, int num);
 	bool place_bells(int color, int amount, int dir);
-	bool place_newsymbolsD(int color, int amount);
-	bool place_newsymbolsE(int color, int amount);
+	bool place_tents(int color, int amount);
+	bool place_circles(int color, int amount);
 	bool place_newsymbolsF(int color, int amount);
 
 	std::shared_ptr<Panel> _panel;

@@ -732,6 +732,20 @@ void Panel::WriteIntersections() {
 		}
 	}
 
+	for (int y = 1; y < _height; y += 2) {
+		for (int x = 1; x < _width; x += 2) {
+			if ((_grid[x][y] & 0xF000700) == Decoration::Tent)
+				render_tent(x, y, intersections, intersectionFlags, polygons);
+		}
+	}
+
+	for (int y = 1; y < _height; y += 2) {
+		for (int x = 1; x < _width; x += 2) {
+			if ((_grid[x][y] & 0xF000700) == Decoration::Circle)
+				render_circle(x, y, intersections, intersectionFlags, polygons);
+		}
+	}
+
 	//Symmetry Data
 	if (id == 0x01D3F && symmetry == Symmetry::None || id == 0x00076 && symmetry == Symmetry::None) {
 		_style &= ~Style::SYMMETRICAL;
@@ -1416,12 +1430,27 @@ void Panel::render_bell(int x, int y, int dir, std::vector<float>& intersections
 	transform_and_place(positions, intersections, intersectionFlags, polys, polygons, x, y, angles[dir - 1]);
 };
 
-void Panel::render_newsymbolsD(int x, int y, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {
-
+void Panel::render_tent(int x, int y, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {
+	std::vector<float> positions = { .5f, .8f, .2f, .2f, .8f, .2f, .5f, .7f, .3f, .3f, .7f, .3f,
+		.5f, .55f, .38f, .3f, .62f, .3f };
+	std::vector<int> polys = { 0, 1, 3, 0, 1, 3, 4, 0, 1, 2, 4, 0, 2, 4, 5, 0, 2, 0, 5, 0, 0, 5, 3, 0, 6, 7, 8, 0};
+	transform_and_place(positions, intersections, intersectionFlags, polys, polygons, x, y);
 };
 
-void Panel::render_newsymbolsE(int x, int y, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {
-
+void Panel::render_circle(int x, int y, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {
+	std::vector<float> positions = { .5f, .5f };
+	std::vector<int> polys;
+	int i = 0;
+	for (int a = 0; a <= 360; a += 20) {
+		positions.emplace_back(.5f + static_cast<float>(cos(a * 3.1415926536f / 180.0f)) * .4f);
+		positions.emplace_back(.5f + static_cast<float>(sin(a * 3.1415926536f / 180.0f)) * .4f);
+		if (a != 0) {
+			polys.emplace_back(0); polys.emplace_back(i); polys.emplace_back(i + 1); polys.emplace_back(0);
+		}
+		i += 1;
+	}
+	//polys.emplace_back(0); polys.emplace_back(i); polys.emplace_back(1); polys.emplace_back(0);
+	transform_and_place(positions, intersections, intersectionFlags, polys, polygons, x, y);
 };
 
 void Panel::render_newsymbolsF(int x, int y, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {

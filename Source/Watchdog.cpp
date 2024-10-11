@@ -162,19 +162,19 @@ bool SymbolWatchdog::check(int x, int y)
 		return checkPointer(x, y, symbol);
 	}
 	if (type == Decoration::Diamond) {
-		return checkDiamonds(x, y, symbol);
+		return checkDiamond(x, y, symbol);
 	}
 	if (type == Decoration::Dice) {
 		return checkDice(x, y, symbol);
 	}
 	if (type == Decoration::Bell) {
-		return checkBells(x, y, symbol);
+		return checkBell(x, y, symbol);
 	}
-	if (type == Decoration::NewSymbolsD) {
-		return checkNewSymbolsD(x, y, symbol);
+	if (type == Decoration::Tent) {
+		return checkTent(x, y, symbol);
 	}
-	if (type == Decoration::NewSymbolsE) {
-		return checkNewSymbolsE(x, y, symbol);
+	if (type == Decoration::Circle) {
+		return checkCircle(x, y, symbol);
 	}
 	if (type == Decoration::NewSymbolsF) {
 		return checkNewSymbolsF(x, y, symbol);
@@ -564,7 +564,7 @@ bool SymbolWatchdog::checkPointer(int x, int y, int symbol) {
 	return num == ((symbol & 0xf0000) >> 16);
 }
 
-bool SymbolWatchdog::checkDiamonds(int x, int y, int symbol) {
+bool SymbolWatchdog::checkDiamond(int x, int y, int symbol) {
 	int count = 0;
 	std::set<Point> region = get_region_for_watchdog({ x, y });
 	for (Point p : region) {
@@ -586,7 +586,7 @@ bool SymbolWatchdog::checkDice(int x, int y, int symbol) {
 	return region.size() == targetCount;
 }
 
-bool SymbolWatchdog::checkBells(int x, int y, int symbol) {
+bool SymbolWatchdog::checkBell(int x, int y, int symbol) {
 	int dir = ((symbol & 0xF0000) >> 16);
 	std::vector<int> pattern = { get({x + 1, y}), get({x, y + 1}), get({x - 1, y}) , get({x, y - 1}) };
 	x += 2;
@@ -609,12 +609,45 @@ bool SymbolWatchdog::checkBells(int x, int y, int symbol) {
 	return true;
 }
 
-bool SymbolWatchdog::checkNewSymbolsD(int x, int y, int symbol) {
+bool SymbolWatchdog::checkTent(int x, int y, int symbol) {
+	int edges = (get({x + 1, y}) == PATH) + (get({x, y + 1}) == PATH) + (get({x - 1, y}) == PATH) + (get({x, y - 1}) == PATH);
+	if (edges == 0) return false;
+	x += 2;
+	for (; y < height; y += 2) {
+		while (x < width) {
+			int symbol2 = get({ x, y });
+			if ((symbol2 & 0xF000000) == Decoration::Tent) {
+				int edges2 = (get({ x + 1, y }) == PATH) + (get({ x, y + 1 }) == PATH) + (get({ x - 1, y }) == PATH) + (get({ x, y - 1 }) == PATH);
+				return edges == edges2;
+			}
+			x += 2;
+		}
+		x = 1;
+	}
 	return true;
 }
 
-bool SymbolWatchdog::checkNewSymbolsE(int x, int y, int symbol) {
-	return true;
+bool SymbolWatchdog::checkCircle(int x, int y, int symbol) {
+	std::set<Point> edges;
+	bool first = false;
+	for (int y2 = 1; y2 < height; y2 += 2) {
+		for (int x2 = 1; x2 < width; x2 += 2) {
+			int symbol2 = get({ x2, y2 });
+			if ((symbol2 & 0xF000000) == Decoration::Circle) {
+				if (!first && (x != x2 || y != y2))
+					return true;
+				first = true;
+				for (Point d : {Point(1, 0), Point(-1, 0), Point(0, 1), Point(0, -1) }) {
+					if (get(Point(x2 + d.first, y2 + d.second)) == PATH) {
+						if (edges.count(d))
+							return false;
+						edges.insert(d);
+					}
+				}
+			}
+		}
+	}
+	return edges.size() == 4;
 }
 
 bool SymbolWatchdog::checkNewSymbolsF(int x, int y, int symbol) {

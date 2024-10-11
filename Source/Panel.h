@@ -105,8 +105,8 @@ public:
 		BellL = 0xC020000,
 		BellU = 0xC030000,
 		BellR = 0xC040000,
-		NewSymbolsD = 0xD000000,
-		NewSymbolsE = 0xE000000,
+		Tent = 0xD000000,
+		Circle = 0xE000000,
 		NewSymbolsF = 0xF000000,
 
 		Empty = 0xA00,
@@ -480,8 +480,8 @@ private:
 	void render_diamond(int x, int y, int num, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons);
 	void render_dice(int x, int y, int num, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons);
 	void render_bell(int x, int y, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons);
-	void render_newsymbolsD(int x, int y, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons);
-	void render_newsymbolsE(int x, int y, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons);
+	void render_tent(int x, int y, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons);
+	void render_circle(int x, int y, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons);
 	void render_newsymbolsF(int x, int y, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons);
 
 	std::shared_ptr<Memory> _memory;

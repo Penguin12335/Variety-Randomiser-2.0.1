@@ -611,33 +611,33 @@ bool Generate::place_all_symbols(PuzzleSymbols & symbols)
 	for (std::pair<int, int> s : symbols[Decoration::Arrow]) if (!place_arrows(s.first & 0xf, s.second, s.first >> 12))
 		return false;
 	//Added_Start
-	for (std::pair<int, int> s : symbols[Decoration::Mine]) if (!place_mines(s.first & 0xf, s.second, (s.first & 0xf0000) >> 16))
-		return false;
 	//for (std::pair<int, int> s : symbols[Decoration::Head]) if (!place_heads(s.first & 0xf, s.second))
 	//	return false;
-	for (std::pair<int, int> s : symbols[Decoration::Mushroom]) if (!place_mushrooms(s.first & 0xf, s.second))
-		return false;
-	for (std::pair<int, int> s : symbols[Decoration::Ghost]) if (!place_ghosts(s.first & 0xf, s.second))
-		return false;
 	for (int t : {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}) {
 		for (std::pair<int, int> s : symbols[Decoration::Bar | (t << 16)]) if (!place_bars(s.first & 0xf, s.second, t))
 			return false;
 	}
-	for (std::pair<int, int> s : symbols[Decoration::Antitriangle]) if (!place_antitriangles(s.first & 0xf, s.second, (s.first & 0xf0000) >> 16))
+	for (std::pair<int, int> s : symbols[Decoration::Circle]) if (!place_circles(s.first & 0xf, s.second))
 		return false;
-	for (std::pair<int, int> s : symbols[Decoration::Dart]) if (!place_darts(s.first & 0xf, s.second, (s.first & 0xf0000) >> 16))
+	for (std::pair<int, int> s : symbols[Decoration::Ghost]) if (!place_ghosts(s.first & 0xf, s.second))
+		return false;
+	for (std::pair<int, int> s : symbols[Decoration::Mushroom]) if (!place_mushrooms(s.first & 0xf, s.second))
+		return false;
+	for (std::pair<int, int> s : symbols[Decoration::Bell]) if (!place_bells(s.first & 0xf, s.second, (s.first & 0xf0000) >> 16))
 		return false;
 	for (std::pair<int, int> s : symbols[Decoration::Rain]) if (!place_rains(s.first & 0xf, s.second, (s.first & 0xf0000) >> 16))
+		return false;
+	for (std::pair<int, int> s : symbols[Decoration::Tent]) if (!place_tents(s.first & 0xf, s.second))
+		return false;
+	for (std::pair<int, int> s : symbols[Decoration::Dart]) if (!place_darts(s.first & 0xf, s.second, (s.first & 0xf0000) >> 16))
 		return false;
 	for (std::pair<int, int> s : symbols[Decoration::Pointer]) if (!place_pointers(s.first & 0xf, s.second))
 		return false;
 	for (std::pair<int, int> s : symbols[Decoration::Dice]) if (!place_dice(s.first & 0xf, s.second, (s.first & 0xf0000) >> 16))
 		return false;
-	for (std::pair<int, int> s : symbols[Decoration::Bell]) if (!place_bells(s.first & 0xf, s.second, (s.first & 0xf0000) >> 16))
+	for (std::pair<int, int> s : symbols[Decoration::Antitriangle]) if (!place_antitriangles(s.first & 0xf, s.second, (s.first & 0xf0000) >> 16))
 		return false;
-	for (std::pair<int, int> s : symbols[Decoration::NewSymbolsD]) if (!place_newsymbolsD(s.first & 0xf, s.second))
-		return false;
-	for (std::pair<int, int> s : symbols[Decoration::NewSymbolsE]) if (!place_newsymbolsE(s.first & 0xf, s.second))
+	for (std::pair<int, int> s : symbols[Decoration::Mine]) if (!place_mines(s.first & 0xf, s.second, (s.first & 0xf0000) >> 16))
 		return false;
 	for (std::pair<int, int> s : symbols[Decoration::NewSymbolsF]) if (!place_newsymbolsF(s.first & 0xf, s.second))
 		return false;
@@ -2618,13 +2618,60 @@ bool Generate::place_bells(int color, int amount, int dir)
 	return true;
 }
 
-bool Generate::place_newsymbolsD(int color, int amount)
+bool Generate::place_tents(int color, int amount)
 {
+	std::set<int> nums = { 1, 2, 3 };
+	while (amount > 0) {
+		if (nums.size() == 0)
+			return false;
+		int num = pick_random(nums);
+		nums.erase(num);
+		std::set<Point> matching;
+		for (Point p : _openpos) {
+			if (in_center(p)) continue;
+			int edges = 0;
+			for (Point d : _DIRECTIONS1) edges += (get(p + d) == PATH);
+			if (edges == num) {
+				matching.insert(p);
+			}
+		}
+		if (matching.size() < amount) continue;
+		while (amount > 0) {
+			Point p = pick_random(matching);
+			matching.erase(p);
+			set(p, Decoration::Tent | color);
+			_openpos.erase(p);
+			amount--;
+		}
+	}
 	return true;
 }
 
-bool Generate::place_newsymbolsE(int color, int amount)
+bool Generate::place_circles(int color, int amount)
 {
+	std::set<Point> sides;
+	std::set<Point> open = _openpos;
+	while (amount > 0) {
+		if (open.size() == 0)
+			return false;
+		Point pos = pick_random(open);
+		open.erase(pos);
+		if (in_center(pos)) continue;
+		bool valid = true;
+		for (Point d : _DIRECTIONS1) {
+			if (get(pos + d) == PATH && sides.count(d) || amount == 1 && get(pos + d) != PATH && !sides.count(d)) {
+				valid = false;
+				break;
+			}
+		}
+		if (!valid) continue;
+		for (Point d : _DIRECTIONS1) {
+			if (get(pos + d) == PATH) sides.insert(d);
+		}
+		set(pos, Decoration::Circle | color);
+		_openpos.erase(pos);
+		amount--;
+	}
 	return true;
 }
 

@@ -84,11 +84,11 @@ public:
 	bool checkRain(int x, int y, int symbol);
 	bool isSurrounded(Point pos, Point dir, int type);
 	bool checkPointer(int x, int y, int symbol);
-	bool checkDiamonds(int x, int y, int symbol);
+	bool checkDiamond(int x, int y, int symbol);
 	bool checkDice(int x, int y, int symbol);
-	bool checkBells(int x, int y, int symbol);
-	bool checkNewSymbolsD(int x, int y, int symbol);
-	bool checkNewSymbolsE(int x, int y, int symbol);
+	bool checkBell(int x, int y, int symbol);
+	bool checkTent(int x, int y, int symbol);
+	bool checkCircle(int x, int y, int symbol);
 	bool checkNewSymbolsF(int x, int y, int symbol);
 	std::set<Point> get_region_for_watchdog(Point pos);
 	std::set<int> get_symbols_in_region_for_watchdog(const std::set<Point>& region);
