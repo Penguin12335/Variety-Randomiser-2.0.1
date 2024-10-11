@@ -140,7 +140,7 @@ private:
 	int count_crossings(Point pos, Point dir);
 	bool place_erasers(const std::vector<int>& colors, const std::vector<int>& eraseSymbols);
 	bool combine_shapes(std::vector<Shape>& shapes);
-
+	bool in_center(Point pos);
 	bool place_heads(int color, int amount);
 	bool place_mushrooms(int color, int amount);
 	bool place_ghosts(int color, int amount);
@@ -155,8 +155,8 @@ private:
 	bool isSurrounded(Point pos, Point dir, int type);
 	bool place_pointers(int color, int amount);
 	bool place_diamonds(int color, int amount, int num);
-	bool place_dice(int color, int amount);
-	bool place_bells(int color, int amount);
+	bool place_dice(int color, int amount, int num);
+	bool place_bells(int color, int amount, int dir);
 	bool place_newsymbolsD(int color, int amount);
 	bool place_newsymbolsE(int color, int amount);
 	bool place_newsymbolsF(int color, int amount);

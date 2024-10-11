@@ -478,7 +478,7 @@ private:
 	void render_rain(int x, int y, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons);
 	void render_pointer(int x, int y, int type, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons);	
 	void render_diamond(int x, int y, int num, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons);
-	void render_dice(int x, int y, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons);
+	void render_dice(int x, int y, int num, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons);
 	void render_bell(int x, int y, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons);
 	void render_newsymbolsD(int x, int y, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons);
 	void render_newsymbolsE(int x, int y, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons);

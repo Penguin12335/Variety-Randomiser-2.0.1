@@ -631,9 +631,9 @@ bool Generate::place_all_symbols(PuzzleSymbols & symbols)
 		return false;
 	for (std::pair<int, int> s : symbols[Decoration::Pointer]) if (!place_pointers(s.first & 0xf, s.second))
 		return false;
-	for (std::pair<int, int> s : symbols[Decoration::Dice]) if (!place_dice(s.first & 0xf, s.second))
+	for (std::pair<int, int> s : symbols[Decoration::Dice]) if (!place_dice(s.first & 0xf, s.second, (s.first & 0xf0000) >> 16))
 		return false;
-	for (std::pair<int, int> s : symbols[Decoration::Bell]) if (!place_bells(s.first & 0xf, s.second))
+	for (std::pair<int, int> s : symbols[Decoration::Bell]) if (!place_bells(s.first & 0xf, s.second, (s.first & 0xf0000) >> 16))
 		return false;
 	for (std::pair<int, int> s : symbols[Decoration::NewSymbolsD]) if (!place_newsymbolsD(s.first & 0xf, s.second))
 		return false;
@@ -1738,8 +1738,7 @@ bool Generate::place_arrows(int color, int amount, int targetCount)
 			return false;
 		Point pos = pick_random(open);
 		open.erase(pos);
-		if (pos.first == _panel->_width / 2 || Point::pillarWidth > 0 && pos.first == _panel->_width / 2 - 1)
-			continue; //Because of a glitch where arrows in the center column won't draw right
+		if (in_center(pos)) continue;
 		int fails = 0;
 		while (fails++ < 20) { //Keep picking random directions until one works
 			int choice = (_parity == -1 ? Random::rand() % 8 : Random::rand() % 4);
@@ -1767,8 +1766,7 @@ bool Generate::place_mines(int color, int amount, int target_num)
 			return false;
 		Point pos = pick_random(open);
 		open.erase(pos);
-		if (pos.first == _panel->_width / 2 || Point::pillarWidth > 0 && pos.first == _panel->_width / 2 - 1)
-			continue; //Because of a glitch additional symbols in the center column won't draw right
+		if (in_center(pos)) continue;
 
 		std::set<Point> result;
 		std::set<Point> region = get_region(pos);
@@ -2000,6 +1998,11 @@ bool Generate::combine_shapes(std::vector<Shape>& shapes)
 	return false;
 }
 
+bool Generate::in_center(Point pos) //Because of a glitch custom symbols in the center column won't draw right
+{
+	return pos.first == _panel->_width / 2 || Point::pillarWidth > 0 && pos.first == _panel->_width / 2 - 1;
+}
+
 bool Generate::place_heads(int color, int amount)
 {
 	std::set<Point> open = _openpos;
@@ -2009,9 +2012,7 @@ bool Generate::place_heads(int color, int amount)
 		if (open.size() == 0 || fails >= 200)
 			return false;
 		Point pos = pick_random(open);
-		if (pos.first == _panel->_width / 2 || Point::pillarWidth > 0 && pos.first == _panel->_width / 2 - 1)
-			continue; //Because of a glitch additional symbols in the center column won't draw right
-
+		if (in_center(pos)) continue;
 		int choice = (_parity != -1 ? Random::rand() % 8 : Random::rand() % 4);
 		Point dir = _8DIRECTIONS2[choice];
 		bool flag = false;
@@ -2049,9 +2050,7 @@ bool Generate::place_mushrooms(int color, int amount)
 			return false;
 		Point pos = pick_random(open);
 		open.erase(pos);
-		if (pos.first == _panel->_width / 2 || Point::pillarWidth > 0 && pos.first == _panel->_width / 2 - 1)
-			continue; //Because of a glitch additional symbols in the center column won't draw right
-
+		if (in_center(pos)) continue;
 		open.erase(pos);
 		int fails = 0;
 		while (fails++ < 30) {
@@ -2083,8 +2082,7 @@ bool Generate::place_ghosts(int color, int amount)
 		if (open.size() == 0)
 			return false;
 		Point pos = pick_random(open);
-		if (pos.first == _panel->_width / 2 || Point::pillarWidth > 0 && pos.first == _panel->_width / 2 - 1)
-			continue; //Because of a glitch additional symbols in the center column won't draw right
+		if (in_center(pos)) continue;
 		if (_openpos.count(pos) >= 1) {
 			set(pos, Decoration::Ghost | color | amount << 16);
 		}
@@ -2122,8 +2120,7 @@ bool Generate::place_bars(int color, int amount,int shape)
 		if (open.size() == 0)
 			return false;
 		Point pos = pick_random(open);
-		if (pos.first == _panel->_width / 2 || Point::pillarWidth > 0 && pos.first == _panel->_width / 2 - 1)
-			continue; //Because of a glitch additional symbols in the center column won't draw right
+		if (in_center(pos)) continue;
 		int pattern = Random::rand() % 11 + 1;
 		if (shape != 0) pattern = shape;
 		//0:X(null) 1:┗(OOCC) 2:┏(COOC) 3:┓(CCOO) 4:┛(OCCO) 5:┳(COOO) 6:┫(OCOO) 7:┻(OOCO) 8:┣(OOOC) 9:╋(OOOO) A:┃(OCOC) B:━(COCO) C:Gap_Column D:Gap_Row
@@ -2134,24 +2131,12 @@ bool Generate::place_bars(int color, int amount,int shape)
 			if ((get(p) & 0xF000700) == Decoration::Bar) {
 				region_data[(get(p) & 0xF0000) >> 16] -= 1;
 			}
-			else if ((get(p) == 0xA00 || get(p) == 0 || get(p) == 0x600) && !(p.first == _panel->_width / 2 || Point::pillarWidth > 0 && p.first == _panel->_width / 2 - 1)) {
+			else if ((get(p) == 0xA00 || get(p) == 0 || get(p) == 0x600) && !in_center(p)) {
 				empty_region.insert(p);
 			}
 		}
 
 		if (region_data[pattern] <= empty_region.size() && empty_region.size() <= amount) {
-			/*
-			OutputDebugStringW(L"パター?番?:");
-			DebugLog(pattern);
-
-			OutputDebugStringW(L",領域に?るパター?の?:");
-			DebugLog(region_data[pattern]);
-
-			OutputDebugStringW(L",領域に?る空?の?:");
-			DebugLog(empty_region.size());
-
-			OutputDebugStringW(L",残りの記??:");
-			*/
 			int count = region_data[pattern];
 			while (count > 0) {
 				Point position = pick_random(empty_region);
@@ -2161,13 +2146,6 @@ bool Generate::place_bars(int color, int amount,int shape)
 				open.erase(position);
 				amount--;
 				count--;
-				/*
-				OutputDebugStringW(L"座標:(");
-				DebugLog(position.first);
-				OutputDebugStringW(L",");
-				DebugLog(position.second);
-				OutputDebugStringW(L")");
-				*/
 			}
 		}
 	}
@@ -2262,8 +2240,7 @@ bool Generate::place_antitriangles(int color, int amount, int target_num)
 			return false;
 		Point pos = pick_random(open);
 		open.erase(pos);
-		if (pos.first == _panel->_width / 2 || Point::pillarWidth > 0 && pos.first == _panel->_width / 2 - 1)
-			continue; //Because of a glitch additional symbols in the center column won't draw right
+		if (in_center(pos)) continue;
 		int num = 0;
 		for (Point c : {Point(1, 1), Point(1, -1), Point(-1, -1), Point(-1, 1)}) {
 
@@ -2323,9 +2300,7 @@ bool Generate::place_darts(int color, int amount, int target_num)
 			return false;
 		Point pos = pick_random(open);
 		open.erase(pos);
-		if (pos.first == _panel->_width / 2 || Point::pillarWidth > 0 && pos.first == _panel->_width / 2 - 1)
-			continue; //Because of a glitch additional symbols in the center column won't draw right
-
+		if (in_center(pos)) continue;
 		int targetCount = 0;
 		int directCount = -1;
 		int direct_num = Random::rand() % 8;
@@ -2361,8 +2336,7 @@ bool Generate::place_rains(int color, int amount, int dir)
 			return false;
 		Point pos = pick_random(open);
 		open.erase(pos);
-		if (pos.first == _panel->_width / 2 || Point::pillarWidth > 0 && pos.first == _panel->_width / 2 - 1)
-			continue; //Because of a glitch additional symbols in the center column won't draw right
+		if (in_center(pos)) continue;
 		int choice = (_parity != -1 ? Random::rand() % 8 : Random::rand() % 4);
 		if (dir) choice = dir - 1;
 		Point direction = _8DIRECTIONS1[choice];
@@ -2413,8 +2387,7 @@ bool Generate::place_pointers(int color, int amount)
 			return false;
 		Point pos = pick_random(open);
 		open.erase(pos);
-		if (pos.first == _panel->_width / 2 || Point::pillarWidth > 0 && pos.first == _panel->_width / 2 - 1)
-			continue; //Because of a glitch additional symbols in the center column won't draw right
+		if (in_center(pos)) continue;
 		int a = 0;
 		std::vector<int> distance = { INT_MAX, INT_MAX , INT_MAX , INT_MAX };
 		for (Point dir : {Point(2, 0), Point(-2, 0), Point(0, 2), Point(0, -2) }){//DASW
@@ -2461,6 +2434,7 @@ bool Generate::place_diamonds(int color, int amount, int num)
 			return false;
 		Point pos = pick_random(open);
 		open.erase(pos);
+		if (in_center(pos)) continue;
 		std::set<Point> region = get_region(pos);
 		int count = 1;
 		for (Point p : region) {
@@ -2471,23 +2445,22 @@ bool Generate::place_diamonds(int color, int amount, int num)
 			if (num > 0) { //Specific count needed, try to add more diamonds to match
 				std::set<Point> open2;
 				for (Point p : region) {
-					if (open.erase(p)) open2.insert(p);
+					if (open.erase(p) && !in_center(p))
+						open2.insert(p);
 				}
 				open2.erase(pos);
 				if (count > num || num - count > amount - 1 || num - count > open2.size()) continue;
 				while (count < num) { //Place more diamonds to match the count
 					Point pos2 = pick_random(open2);
 					open2.erase(pos2);
-					set(pos2, Decoration::Diamond);
-					_openpos.erase(pos2);
 					diamonds.insert(pos2);
+					set(pos, Decoration::Diamond);
 					count++;
 					amount--;
 				}
 			}
-			set(pos, Decoration::Diamond);
-			_openpos.erase(pos);
 			diamonds.insert(pos);
+			set(pos, Decoration::Diamond);
 			amount--;
 		}
 		else {
@@ -2507,13 +2480,141 @@ bool Generate::place_diamonds(int color, int amount, int num)
 	return true;
 }
 
-bool Generate::place_dice(int color, int amount)
+bool Generate::place_dice(int color, int amount, int num)
 {
+	std::set<Point> open = _openpos;
+	if (num != 0) {
+		while (amount > 0) {
+			if (open.size() == 0)
+				return false;
+			Point pos = pick_random(open);
+			std::set<Point> region = get_region(pos);
+			std::set<Point> open2;
+			for (Point p : region) {
+				if (open.erase(p) && !in_center(p))
+					open2.insert(p);
+			}
+			if (region.size() % num != 0) continue;
+			int numDice = static_cast<int>(region.size()) / num;
+			if (numDice > amount || numDice > open2.size()) continue;
+			for (; numDice > 0; numDice--) {
+				Point p = pick_random(open2);
+				open2.erase(p);
+				set(p, Decoration::Dice | color | (num << 16));
+				_openpos.erase(p);
+				amount--;
+			}
+		}
+		return true;
+	}
+	std::set<Point> dice;
+	while (amount > 0) {
+		if (open.size() == 0)
+			return false;
+		Point pos = pick_random(open);
+		open.erase(pos);
+		if (in_center(pos)) continue;
+		dice.insert(pos);
+		amount--;
+	}
+	for (Point pos : dice) {
+		std::set<Point> region = get_region(pos);
+		int regionLeft = static_cast<int>(region.size());
+		std::set<Point> diceInRegion;
+		for (Point p : dice) {
+			if (region.count(p)) diceInRegion.insert(p);
+		}
+		if (diceInRegion.size() * 6 < region.size()) return false;
+		int diceLeft = static_cast<int>(diceInRegion.size()) - 1;
+		for (Point p : diceInRegion) {
+			int roll = 100;
+			int rollMin = max(1, regionLeft - diceLeft * 6);
+			int rollMax = min(6, regionLeft - diceLeft);
+			if (diceLeft == 0) roll = regionLeft;
+			else for (int i = 0; i < diceLeft; i++) {
+				roll = min(roll, Random::rand() % (rollMax - rollMin + 1) + rollMin);
+			}
+			set(p, Decoration::Dice | color | (roll << 16));
+			_openpos.erase(pos);
+			regionLeft -= roll;
+			diceLeft--;
+		}
+	}
 	return true;
 }
 
-bool Generate::place_bells(int color, int amount)
+bool Generate::place_bells(int color, int amount, int dir)
 {
+	bool randomDir = dir == 0;
+	std::set<Point> open = _openpos;
+	while (amount > 0) {
+		if (open.size() == 0)
+			return false;
+		Point pos = pick_random(open);
+		open.erase(pos);
+		if (in_center(pos)) continue;
+		std::set<Point> matching;
+		if (randomDir) {
+			int edges = 0;
+			for (Point d : _DIRECTIONS1) edges += (get(pos + d) == PATH);
+			if (edges == 2 && (get(pos + Point(1, 0)) == PATH) == (get(pos + Point(-1, 0)) == PATH))
+				edges = -2;
+			for (Point p : open) {
+				if (in_center(p)) continue;
+				int edges2 = 0;
+				for (Point d : _DIRECTIONS1) edges2 += (get(p + d) == PATH);
+				if (edges2 == 2 && (get(p + Point(1, 0)) == PATH) == (get(p + Point(-1, 0)) == PATH))
+					edges2 = -2;
+				if (edges == edges2) {
+					matching.insert(p);
+				}
+			}
+		}
+		else {
+			std::vector<int> pattern = { get(pos + Point(1, 0)), get(pos + Point(0, 1)), get(pos + Point(-1, 0)), get(pos + Point(0, -1)) };
+			for (Point p : open) {
+				if (in_center(p)) continue;
+				std::vector<int> pattern2 = { get(p + Point(1, 0)), get(p + Point(0, 1)), get(p + Point(-1, 0)), get(p + Point(0, -1)) };
+				if (pattern == pattern2) {
+					matching.insert(p);
+				}
+			}
+		}
+		for (Point p : matching) {
+			open.erase(p);
+		}
+		if (matching.size() + 1 < amount) continue;
+		if (randomDir) dir = 1;
+		set(pos, Decoration::Bell | color | (dir << 16));
+		_openpos.erase(pos);
+		amount--;
+		std::vector<int> pattern = { get(pos + Point(1, 0)), get(pos + Point(0, 1)), get(pos + Point(-1, 0)), get(pos + Point(0, -1)) };
+		while (amount > 0) {
+			Point p = pick_random(matching);
+			matching.erase(p);
+			if (!randomDir) {
+				set(p, Decoration::Bell | color | (dir << 16));
+				_openpos.erase(p);
+				amount--;
+				continue;
+			}
+			std::vector<int> pattern2 = { get(p + Point(1, 0)), get(p + Point(0, 1)), get(p + Point(-1, 0)), get(p + Point(0, -1)) };
+			int dir2 = Random::rand() % 4 + 1;
+			for (; 1; dir2++) {
+				int i = 0;
+				for (; i < 4; i++) {
+					if ((pattern[(i + dir) % 4] == PATH) != (pattern2[(i + dir2) % 4] == PATH))
+						break;
+				}
+				if (i == 4) {
+					set(p, Decoration::Bell | color | (((dir2 + 3) % 4 + 1) << 16));
+					_openpos.erase(p);
+					amount--;
+					break;
+				}
+			}
+		}
+	}
 	return true;
 }
 

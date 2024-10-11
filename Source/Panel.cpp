@@ -1363,12 +1363,57 @@ void Panel::render_diamond(int x, int y, int num, std::vector<float>& intersecti
 	transform_and_place(positions, intersections, intersectionFlags, polys, polygons, x, y);
 };
 
-void Panel::render_dice(int x, int y, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {
-
+void Panel::render_dice(int x, int y, int num, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {
+	std::vector<float> positions = { .1f, .1f, .1f, .9f, .9f, .9f, .9f, .1f,
+		.2f, .2f, .2f, .8f, .8f, .8f, .8f, .2f, };
+	std::vector<int> polys = { 0, 1, 4, 0, 1, 4, 5, 0, 1, 2, 5, 0, 2, 5, 6, 0,
+		2, 3, 6, 0, 3, 6, 7, 0, 3, 4, 7, 0, 4, 0, 3, 0 };
+	std::vector<std::vector<int>> pips = { {4}, {2,6}, {2,4,6}, {0,2,6,8}, {0,2,4,6,8}, {0,2,3,5,6,8} };
+	std::vector<float> positions2;
+	std::vector<int> polys2;
+	for (int i = 0; i < pips[num - 1].size(); i++) {
+		float dx = (pips[num - 1][i] % 3) * .15f; float dy = (pips[num - 1][i] / 3) * .15f;
+		positions2 = { .3f+dx, .3f+dy, .3f+dx, .4f+dy, .4f+dx, .4f+dy, .4f+dx, .3f+dy };
+		polys2 = { 8 + i * 4, 9 + i * 4, 10 + i * 4, 0, 10 + i * 4, 11 + i * 4, 8 + i * 4, 0 };
+		positions.insert(positions.end(), positions2.begin(), positions2.end());
+		polys.insert(polys.end(), polys2.begin(), polys2.end());
+	}
+	transform_and_place(positions, intersections, intersectionFlags, polys, polygons, x, y);
 };
 
 void Panel::render_bell(int x, int y, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {
+	std::vector<float> positions = {
+	0.5f, 0.8f,
+	0.1f, 0.8f,
+	0.2f, 0.7f,
+	0.25f, 0.6f,
+	0.25f, 0.4f,
+	0.3f, 0.3f,
+	0.4f, 0.2f,
+	0.6f, 0.2f,
+	0.7f, 0.3f,
+	0.75f, 0.4f,
+	0.75f, 0.6f,
+	0.8f, 0.7f,
+	0.9f, 0.8f,
+	};
+	std::vector<int> polys_basic = { 0, 1, 2, 0 };
+	std::vector<int> polys = {};
 
+	for (int i = 0; i < positions.size() / 2; i += 1)
+	{
+		if (i + 2 >= positions.size() / 2) break;
+		for (int j = 0; j < polys_basic.size(); j++) {
+			if (j % 4 == 0 || j % 4 == 3) {
+				polys.push_back(0);
+			}
+			else {
+				polys.push_back(polys_basic[j] + i);
+			}
+		}
+	}
+	std::vector<int> angles = { 180, 90, 0, -90 };
+	transform_and_place(positions, intersections, intersectionFlags, polys, polygons, x, y, angles[dir - 1]);
 };
 
 void Panel::render_newsymbolsD(int x, int y, int dir, std::vector<float>& intersections, std::vector<int>& intersectionFlags, std::vector<int>& polygons) {

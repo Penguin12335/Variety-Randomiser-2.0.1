@@ -580,13 +580,32 @@ bool SymbolWatchdog::checkDice(int x, int y, int symbol) {
 	std::set<Point> region = get_region_for_watchdog({ x, y });
 	for (Point p : region) {
 		if ((get(p) & 0xF000000) == Decoration::Dice) {
-			targetCount += (get(p) & 0xF0000);
+			targetCount += (get(p) & 0xF0000) >> 16;
 		}
 	}
 	return region.size() == targetCount;
 }
 
 bool SymbolWatchdog::checkBells(int x, int y, int symbol) {
+	int dir = ((symbol & 0xF0000) >> 16);
+	std::vector<int> pattern = { get({x + 1, y}), get({x, y + 1}), get({x - 1, y}) , get({x, y - 1}) };
+	x += 2;
+	for (; y < height; y += 2) {
+		while (x < width) {
+			int symbol2 = get({ x, y });
+			if ((symbol2 & 0xF000000) == Decoration::Bell) {
+				std::vector<int> pattern2 = { get({x + 1, y}), get({x, y + 1}), get({x - 1, y}) , get({x, y - 1}) };
+				int dir2 = ((symbol2 & 0xF0000) >> 16);
+				for (int i = 0; i < 4; i++) {
+					if ((pattern[(i + dir) % 4] == PATH) != (pattern2[(i + dir2) % 4] == PATH))
+						return false;
+				}
+				return true;
+			}
+			x += 2;
+		}
+		x = 1;
+	}
 	return true;
 }
 
