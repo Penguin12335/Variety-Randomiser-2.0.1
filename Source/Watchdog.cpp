@@ -216,9 +216,6 @@ bool SymbolWatchdog::checkMine(int x, int y,int symbol) {
 		num = 8 - num;
 	}
 
-	OutputDebugStringW(L"Test:");
-	DebugLog(num);
-	DebugLog(0xf0000 & symbol);
 	return num == (0xf0000 & symbol) >> 16;
 }
 
@@ -275,30 +272,16 @@ bool SymbolWatchdog::checkGhost(int x, int y, int symbol) {
 		for (Point p : get_region_for_watchdog(pos)) {
 			if(flag && (get(p) & 0xf000000) == Decoration::Ghost)
 			{
-				OutputDebugStringW(L"(");
-				DebugLog(p.first);
-				OutputDebugStringW(L",");
-				DebugLog(p.second);
-				OutputDebugStringW(L")");
-				OutputDebugStringW(L"too_many_ghost");
 				return false;
 			}
 			else if ((get(p) & 0xf000000) == Decoration::Ghost) {
-
-				OutputDebugStringW(L"(");
-				DebugLog(p.first);
-				OutputDebugStringW(L",");
-				DebugLog(p.second);
-				OutputDebugStringW(L")");
 				flag = true;
 			}
 			open.erase(p);
 		};
 		if (!flag) {
-			OutputDebugStringW(L"no_ghost");
 			return false;
 		}
-		OutputDebugStringW(L"passed");
 	}
 	return true;
 }
@@ -310,23 +293,6 @@ bool SymbolWatchdog::checkBar(int x, int y, int symbol) {
 	Point pos = Point(x,y);
 	//0:X(null) 1:┗(OOCC) 2:┏(COOC) 3:┓(CCOO) 4:┛(OCCO) 5:┳(COOO) 6:┫(OCOO) 7:┻(OOCO) 8:┣(OOOC) 9:╋(OOOO) A:┃(OCOC) B:━(COCO) C:Gap_Column D:Gap_Row
 	std::vector<int> region_data = get_region_grid_patterns_fw(get_region_points_fw(pos));
-	/*
-	OutputDebugStringW(L"\nこの記号パターンとその座標:");
-	DebugLog(num);
-	OutputDebugStringW(L"(");
-	DebugLog(x);
-	OutputDebugStringW(L",");
-	DebugLog(y);
-	OutputDebugStringW(L")");
-	OutputDebugStringW(L"\nこの領域にあった点の数:");
-	DebugLog(get_region_points_fw(pos).size());
-	OutputDebugStringW(L"\n領域パターン数(シンボルではない):(");
-	for (int i = 0; i < 13; i++) {
-		DebugLog(region_data[i]);
-		OutputDebugStringW(L",");
-	}
-	OutputDebugStringW(L")");
-	*/
 	std::set<Point> symbols_data = get_region_for_watchdog(pos);
 	for (Point p : symbols_data) {
 		if ((grid[p.first][p.second] & 0xF0F0000) == (symbol & 0xF0F0000)) {
@@ -399,15 +365,6 @@ std::vector<int> SymbolWatchdog::get_region_grid_patterns_fw(std::set<Point> poi
 			count++;
 			if (_4dir == d) {
 				result[count] += 1;
-				/*
-				OutputDebugStringW(L"(");
-				DebugLog(p.first);
-				OutputDebugStringW(L",");
-				DebugLog(p.second);
-				OutputDebugStringW(L")のパターンは");
-				DebugLog(count);
-				OutputDebugStringW(L"でした。\n");
-				*/
 			}
 		}
 
