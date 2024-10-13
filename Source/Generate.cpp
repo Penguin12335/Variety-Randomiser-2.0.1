@@ -2247,6 +2247,7 @@ bool Generate::place_antitriangles(int color, int amount, int target_num)
 			if (check_it_is_corner(pos + c)) {
 				num += 1;
 			}
+			if (_exits.count(pos + c)) num = -100; //Avoid ambiguity with endpoint turning
 		}
 		if (num >= 1 && (target_num == 0 || num == target_num)) {
 			set(pos, Decoration::Antitriangle | color | num << 16);//0x10(num)000(color)
