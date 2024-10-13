@@ -53,14 +53,14 @@ void SymbolWatchdog::action() {
 		for (int x = 1; x < width; x++) {
 			for (int y = 1; y < height; y++) {
 				if (!check(x, y)) {
-					OutputDebugStringW(L"No");
-					WritePanelData<int>(id, STYLE_FLAGS, { style | Panel::Style::HAS_TRIANGLES });
+					WriteArray<int>(id, SEQUENCE, { 69 }, true);
+					WritePanelData<int>(id, SEQUENCE_LEN, { 1 });
 					return;
 				}
 			}
 		}
-		OutputDebugStringW(L"Yes");
-		WritePanelData<int>(id, STYLE_FLAGS, { style & ~Panel::Style::HAS_TRIANGLES });
+		WritePanelData<uint64_t>(id, SEQUENCE, { 0 });
+		WritePanelData<int>(id, SEQUENCE_LEN, { 0 });
 	}
 }
 
@@ -73,13 +73,8 @@ void SymbolWatchdog::initPath()
 	if (style & Panel::Style::SYMMETRICAL) {
 		for (int i = 0; i < numTraced; i++) {
 			SolutionPoint sp;
-			if (traced[i].pointA >= exitPoint || traced[i].pointB >= exitPoint) {
-				sp.pointA = sp.pointB = exitPoint;
-			}
-			else {
-				sp.pointA = (width / 2 + 1) * (height / 2 + 1) - 1 - traced[i].pointA;
-				sp.pointB = (width / 2 + 1) * (height / 2 + 1) - 1 - traced[i].pointB;
-			}
+			sp.pointA = symmetryData[traced[i].pointA];
+			sp.pointB = symmetryData[traced[i].pointB];
 			traced.push_back(sp);
 		}
 	}
@@ -87,13 +82,19 @@ void SymbolWatchdog::initPath()
 	tracedLength = numTraced;
 	complete = false;
 	if (traced.size() == 0) return;
+	int lastp1 = 0;
 	for (const SolutionPoint& p : traced) {
 		int p1 = p.pointA, p2 = p.pointB;
-		if (p1 == exitPoint || p2 == exitPoint) {
+		if (std::find(exits.begin(), exits.end(), p2) != exits.end()) {
 			complete = true;
+		}
+		if (p1 >= exitPoint) {
+			p1 = lastp1;
+		}
+		lastp1 = p1;
+		if (p2 >= exitPoint) {
 			continue;
 		}
-		else if (p1 > exitPoint || p2 > exitPoint) continue;
 		if (p1 == 0 && p2 == 0 || p1 < 0 || p2 < 0) {
 			return;
 		}
@@ -112,10 +113,6 @@ void SymbolWatchdog::initPath()
 			grid[x2][y2] = PATH;
 			grid[(x1 + x2) / 2][(y1 + y2) / 2] = PATH;
 		}
-		if (p1 == exitPos || p2 == exitPos || (style & Panel::Style::SYMMETRICAL) && (p1 == exitPosSym || p2 == exitPosSym)) {
-			complete = !complete;
-		}
-		else complete = false;
 	}
 }
 
@@ -123,14 +120,6 @@ bool SymbolWatchdog::check(int x, int y)
 {
 	int symbol = grid[x][y];
 	int type = symbol & 0xF000700;
-	if (type == Decoration::Triangle && (symbol & 0xf0000) != 0) {
-		int count = 0;
-		if (grid[x - 1][y] == PATH) count++;
-		if (grid[x + 1][y] == PATH) count++;
-		if (grid[x][y - 1] == PATH) count++;
-		if (grid[x][y + 1] == PATH) count++;
-		return count == (symbol >> 16);
-	}
 	if (type == Decoration::Arrow) {
 		return checkArrow(x, y, symbol);
 	}
@@ -568,7 +557,7 @@ bool SymbolWatchdog::checkDiamond(int x, int y, int symbol) {
 	int count = 0;
 	std::set<Point> region = get_region_for_watchdog({ x, y });
 	for (Point p : region) {
-		if (get(p) != 0 && get(p) != Decoration::Triangle) {
+		if (get(p) != 0) {
 			count++;
 		}
 	}

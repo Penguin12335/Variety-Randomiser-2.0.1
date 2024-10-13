@@ -293,12 +293,6 @@ void Panel::WriteDecorations() {
 			}
 		}
 	}
-	if (custom) {
-		for (int i = 0; i < decorations.size(); i++) {
-			if (decorations[i] == 0) decorations[i] = Decoration::Triangle; //To force it to be unsolvable
-		}
-		_memory->WritePanelData<int>(id, OUTER_BACKGROUND_MODE, { 1 });
-	}
 	if (!any) {
 		_memory->WritePanelData<int>(id, NUM_DECORATIONS, { 0 });
 	}

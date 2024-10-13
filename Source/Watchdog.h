@@ -57,8 +57,11 @@ public:
 		complete = false;
 		style = ReadPanelData<int>(id, STYLE_FLAGS);
 		DIRECTIONS = { Point(0, 2), Point(0, -2), Point(2, 0), Point(-2, 0), Point(2, 2), Point(2, -2), Point(-2, -2), Point(-2, 2) };
-		exitPos = panel.xy_to_loc(panel._endpoints[0].GetX(), panel._endpoints[0].GetY());
-		exitPosSym = (width / 2 + 1) * (height / 2 + 1) - 1 - exitPos;
+		if (ReadPanelData<int>(id, REFLECTION_DATA))
+			symmetryData = ReadArray<int>(id, REFLECTION_DATA, ReadPanelData<int>(id, NUM_DOTS));
+		for (Endpoint& e : panel._endpoints) {
+			exits.emplace_back(panel.xy_to_loc(e.GetX(), e.GetY()));
+		}
 		exitPoint = (width / 2 + 1) * (height / 2 + 1);
 	}
 	SymbolWatchdog(int id, int pillarWidth) : SymbolWatchdog(id) {
@@ -101,7 +104,9 @@ public:
 	int tracedLength;
 	bool complete;
 	int style;
-	int exitPos, exitPosSym, exitPoint;
+	std::vector<int> exits;
+	int exitPoint;
+	std::vector<int> symmetryData;
 	std::vector<Point> DIRECTIONS;
 	template<class T>
 	T pick_random_fw(const std::set<T>& set);
