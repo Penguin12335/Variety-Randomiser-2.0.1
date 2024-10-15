@@ -533,14 +533,16 @@ bool SymbolWatchdog::checkDice(int x, int y, int symbol) {
 }
 
 bool SymbolWatchdog::checkBell(int x, int y, int symbol) {
+	Point pos = { x, y };
 	int dir = ((symbol & 0xF0000) >> 16);
-	std::vector<int> pattern = { get({x + 1, y}), get({x, y + 1}), get({x - 1, y}) , get({x, y - 1}) };
+	std::vector<int> pattern = { get(pos + Point({1, 0})), get(pos + Point({0, 1})), get(pos + Point({-1, 0})), get(pos + Point({0, -1})) };
 	x += 2;
 	for (; y < height; y += 2) {
 		while (x < width) {
-			int symbol2 = get({ x, y });
+			pos = Point(x, y);
+			int symbol2 = get(pos);
 			if ((symbol2 & 0xF000000) == Decoration::Bell) {
-				std::vector<int> pattern2 = { get({x + 1, y}), get({x, y + 1}), get({x - 1, y}) , get({x, y - 1}) };
+				std::vector<int> pattern2 = { get(pos + Point({1, 0})), get(pos + Point({0, 1})), get(pos + Point({-1, 0})), get(pos + Point({0, -1})) };
 				int dir2 = ((symbol2 & 0xF0000) >> 16);
 				for (int i = 0; i < 4; i++) {
 					if ((pattern[(i + dir) % 4] == PATH) != (pattern2[(i + dir2) % 4] == PATH))
@@ -556,14 +558,16 @@ bool SymbolWatchdog::checkBell(int x, int y, int symbol) {
 }
 
 bool SymbolWatchdog::checkTent(int x, int y, int symbol) {
-	int edges = (get({x + 1, y}) == PATH) + (get({x, y + 1}) == PATH) + (get({x - 1, y}) == PATH) + (get({x, y - 1}) == PATH);
+	Point pos = { x, y };
+	int edges = (get(pos + Point({ 1, 0 })) == PATH) + (get(pos + Point({ 0, 1 })) == PATH) + (get(pos + Point({ -1, 0 })) == PATH) + (get(pos + Point({ 0, -1 })) == PATH);
 	if (edges == 0) return false;
 	x += 2;
 	for (; y < height; y += 2) {
 		while (x < width) {
-			int symbol2 = get({ x, y });
+			pos = Point(x, y);
+			int symbol2 = get(pos);
 			if ((symbol2 & 0xF000000) == Decoration::Tent) {
-				int edges2 = (get({ x + 1, y }) == PATH) + (get({ x, y + 1 }) == PATH) + (get({ x - 1, y }) == PATH) + (get({ x, y - 1 }) == PATH);
+				int edges2 = (get(pos + Point({ 1, 0 })) == PATH) + (get(pos + Point({ 0, 1 })) == PATH) + (get(pos + Point({ -1, 0 })) == PATH) + (get(pos + Point({ 0, -1 })) == PATH);
 				return edges == edges2;
 			}
 			x += 2;
@@ -578,13 +582,14 @@ bool SymbolWatchdog::checkCircle(int x, int y, int symbol) {
 	bool first = false;
 	for (int y2 = 1; y2 < height; y2 += 2) {
 		for (int x2 = 1; x2 < width; x2 += 2) {
-			int symbol2 = get({ x2, y2 });
+			Point pos = Point(x2, y2);
+			int symbol2 = get(pos);
 			if ((symbol2 & 0xF000000) == Decoration::Circle) {
 				if (!first && (x != x2 || y != y2))
 					return true;
 				first = true;
 				for (Point d : {Point(1, 0), Point(-1, 0), Point(0, 1), Point(0, -1) }) {
-					if (get(Point(x2 + d.first, y2 + d.second)) == PATH) {
+					if (get(pos + d) == PATH) {
 						if (edges.count(d))
 							return false;
 						edges.insert(d);
@@ -610,8 +615,8 @@ std::set<Point> SymbolWatchdog::get_region_for_watchdog(Point pos) {
 		check.pop_back();
 		for (Point dir : { Point(0, 1), Point(0, -1), Point(1, 0), Point(-1, 0) }) {
 			Point p1 = p + dir;
-			if ((p1.first == 0 || p1.first + 1 == width) || p1.second == 0 || p1.second + 1 == height) continue;
-			if (grid[p1.first][p1.second] == PATH || grid[p1.first][p1.second] == OPEN) continue;
+			if (Point::pillarWidth == 0 && (p1.first == 0 || p1.first + 1 == width) || p1.second == 0 || p1.second + 1 == height) continue;
+			if (grid[p1.first][p1.second] == PATH) continue;
 			Point p2 = p + dir * 2;
 			if ((grid[p2.first][p2.second] & Decoration::Empty) == Decoration::Empty) continue;
 			if (region.insert(p2).second) {
